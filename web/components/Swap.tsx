@@ -96,13 +96,13 @@ export function Swap() {
   }
 
   return (
-    <div className="rounded-2xl hairline bg-panel p-5">
-      <h2 className="text-sm font-medium text-white">Swap</h2>
-      <p className="mt-1 text-xs text-muted">
+    <div className="glass p-6">
+      <h2 className="text-sm font-medium text-fg">Swap</h2>
+      <p className="mt-1 text-xs text-faint">
         One transaction. The book first, the curve for the rest.
       </p>
 
-      <div className="mt-5 rounded-xl hairline bg-[#0B0D10] p-4">
+      <div className="lift mt-5 rounded-xl border border-white/[0.08] bg-white/[0.03] p-4">
         <div className="flex items-center justify-between text-[11px] uppercase tracking-[0.14em] text-muted">
           <span>You pay</span>
           <span>{inSym}</span>
@@ -111,7 +111,7 @@ export function Swap() {
           value={amount}
           onChange={(e) => setAmount(e.target.value)}
           inputMode="decimal"
-          className="mt-2 w-full bg-transparent text-2xl tabular text-white outline-none placeholder:text-[#2A2E36]"
+          className="mt-2 w-full bg-transparent font-mono text-2xl tabular text-fg outline-none placeholder:text-faint/50"
           placeholder="0.00"
         />
       </div>
@@ -120,18 +120,18 @@ export function Swap() {
         <button
           onClick={() => setZeroForOne((v) => !v)}
           aria-label="flip direction"
-          className="absolute left-1/2 top-[-14px] z-10 -translate-x-1/2 rounded-lg hairline bg-panel p-2 transition-colors hover:border-accent"
+          className="glow-btn absolute left-1/2 top-[-14px] z-10 -translate-x-1/2 rounded-xl border border-white/10 bg-elevated p-2 hover:border-accent"
         >
-          <ArrowDown size={14} className="text-soft" />
+          <ArrowDown size={14} className="text-muted" />
         </button>
       </div>
 
-      <div className="mt-4 rounded-xl hairline bg-[#0B0D10] p-4">
+      <div className="lift mt-4 rounded-xl border border-white/[0.08] bg-white/[0.03] p-4">
         <div className="flex items-center justify-between text-[11px] uppercase tracking-[0.14em] text-muted">
           <span>You receive</span>
           <span>{outSym}</span>
         </div>
-        <div className="mt-2 text-2xl tabular text-white">
+        <div className="mt-2 font-mono text-2xl tabular text-fg">
           {quote ? fmt(quote.expectedOut) : "0.0000"}
         </div>
       </div>
@@ -149,13 +149,13 @@ export function Swap() {
         whileTap={{ scale: 0.985 }}
         onClick={onSwap}
         disabled={!address || !quote || isPending}
-        className="mt-5 w-full rounded-xl bg-white py-3 text-sm font-medium text-ink transition-opacity disabled:opacity-30"
+        className="glow-btn mt-5 w-full rounded-xl bg-fg py-3 text-sm font-medium text-deep disabled:opacity-25"
       >
         {!address ? "Connect wallet" : isPending ? "Confirm in wallet…" : "Swap"}
       </motion.button>
 
       {status && (
-        <p className="mt-3 break-words text-center text-[11px] text-muted">
+        <p className="mt-3 break-words text-center font-mono text-[11px] text-muted">
           {status}
         </p>
       )}

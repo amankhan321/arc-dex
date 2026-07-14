@@ -20,9 +20,9 @@ export function BookLadder() {
     bids[0] && asks[0] ? asks[0].price - bids[0].price : null;
 
   return (
-    <div className="rounded-2xl hairline bg-panel p-5">
+    <div className="glass p-6">
       <div className="flex items-baseline justify-between">
-        <h2 className="text-sm font-medium text-white">Order book</h2>
+        <h2 className="text-sm font-medium text-fg">Order book</h2>
         <span className="text-[11px] text-muted">USDC / EURC</span>
       </div>
 
@@ -43,7 +43,7 @@ export function BookLadder() {
       </div>
 
       {/* the spread, and where the curve sits inside it */}
-      <div className="my-3 flex items-center justify-between rounded-lg bg-[#0B0D10] px-3 py-2 hairline">
+      <div className="my-3 flex items-center justify-between rounded-xl border border-white/[0.08] bg-white/[0.03] px-3 py-2">
         <span className="text-[11px] text-muted">
           {spread !== null ? `spread ${(spread * 1e4).toFixed(1)} bps` : "one-sided"}
         </span>
@@ -86,7 +86,7 @@ function Row({
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.18 }}
-      className="relative grid grid-cols-[1fr_auto_auto] gap-x-4 px-2 py-[5px] text-xs tabular"
+      className="relative grid cursor-default grid-cols-[1fr_auto_auto] gap-x-4 rounded px-2 py-[5px] font-mono text-xs tabular transition-colors duration-200 hover:bg-white/[0.04]"
     >
       <motion.div
         layout
@@ -96,7 +96,7 @@ function Row({
         transition={{ type: "spring", stiffness: 140, damping: 20 }}
       />
       <span className={`relative ${tone}`}>{level.price.toFixed(5)}</span>
-      <span className="relative text-right text-soft">{fmt(level.size, 2)}</span>
+      <span className="relative text-right text-muted">{fmt(level.size, 2)}</span>
       <span className="relative text-right text-muted">
         {(Number(level.size) / 1e6 * level.price).toFixed(2)}
       </span>
@@ -106,7 +106,7 @@ function Row({
 
 function Empty({ children }: { children: React.ReactNode }) {
   return (
-    <div className="px-2 py-3 text-center text-[11px] text-[#3A3F49]">
+    <div className="px-2 py-3 text-center text-[11px] text-faint">
       {children}
     </div>
   );

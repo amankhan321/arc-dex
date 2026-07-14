@@ -68,13 +68,13 @@ export function LimitPanel() {
   }
 
   return (
-    <div className="rounded-2xl hairline bg-panel p-5">
-      <h2 className="text-sm font-medium text-white">Make</h2>
-      <p className="mt-1 text-xs text-muted">
+    <div className="glass p-6">
+      <h2 className="text-sm font-medium text-fg">Make</h2>
+      <p className="mt-1 text-xs text-faint">
         Post-only. Crossing orders are rejected, not filled.
       </p>
 
-      <div className="mt-4 grid grid-cols-2 gap-1 rounded-lg bg-[#0B0D10] p-1 hairline">
+      <div className="mt-4 grid grid-cols-2 gap-1 rounded-xl border border-white/[0.08] bg-white/[0.03] p-1">
         {([true, false] as const).map((b) => (
           <button
             key={String(b)}
@@ -101,7 +101,7 @@ export function LimitPanel() {
         whileTap={{ scale: 0.985 }}
         onClick={place}
         disabled={!address || isPending}
-        className="mt-4 w-full rounded-xl bg-white/95 py-2.5 text-sm font-medium text-ink disabled:opacity-30"
+        className="glow-btn mt-4 w-full rounded-xl bg-fg py-2.5 text-sm font-medium text-deep disabled:opacity-25"
       >
         {!address ? "Connect wallet" : "Place limit order"}
       </motion.button>
@@ -109,13 +109,13 @@ export function LimitPanel() {
       <button
         onClick={claim}
         disabled={!address}
-        className="mt-2 w-full rounded-xl hairline py-2.5 text-xs text-soft transition-colors hover:border-accent disabled:opacity-30"
+        className="glow-btn mt-2 w-full rounded-xl border border-white/[0.08] py-2.5 text-xs text-muted hover:border-accent hover:text-fg disabled:opacity-25"
       >
         Claim fills
       </button>
 
       {status && (
-        <p className="mt-3 break-words text-center text-[11px] text-muted">{status}</p>
+        <p className="mt-3 break-words text-center font-mono text-[11px] text-muted">{status}</p>
       )}
     </div>
   );
@@ -131,7 +131,7 @@ function Field({
   onChange: (v: string) => void;
 }) {
   return (
-    <div className="rounded-xl hairline bg-[#0B0D10] p-3">
+    <div className="lift rounded-xl border border-white/[0.08] bg-white/[0.03] p-3">
       <span className="text-[10px] uppercase tracking-[0.14em] text-muted">
         {label}
       </span>
@@ -139,7 +139,7 @@ function Field({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         inputMode="decimal"
-        className="mt-1 w-full bg-transparent text-sm tabular text-white outline-none"
+        className="mt-1 w-full bg-transparent font-mono text-sm tabular text-fg outline-none"
       />
     </div>
   );

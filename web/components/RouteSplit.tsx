@@ -39,7 +39,7 @@ export function RouteSplit({
       : null;
 
   return (
-    <div className="mt-5 rounded-xl hairline bg-[#0B0D10] p-4">
+    <div className="glass mt-5 p-4">
       <div className="mb-3 flex items-baseline justify-between">
         <span className="text-[11px] uppercase tracking-[0.14em] text-muted">
           Route
@@ -56,7 +56,7 @@ export function RouteSplit({
       </div>
 
       {/* the split bar */}
-      <div className="flex h-2 w-full gap-[3px] overflow-hidden rounded-full bg-[#15181D]">
+      <div className="flex h-2 w-full gap-[3px] overflow-hidden rounded-full bg-white/[0.06]">
         {bookPct > 0 && (
           <motion.div
             layout
@@ -120,11 +120,11 @@ function Leg({
   return (
     <motion.div
       animate={{ opacity: dim ? 0.35 : 1 }}
-      className="rounded-lg bg-[#0E1013] p-3 hairline"
+      className="lift rounded-xl border border-white/[0.08] bg-white/[0.03] p-3"
     >
       <div className="flex items-center gap-2">
         <span className={`h-1.5 w-1.5 rounded-full ${dot}`} />
-        <span className="text-xs text-soft">{label}</span>
+        <span className="text-xs text-muted">{label}</span>
         <span className="ml-auto text-xs tabular text-muted">
           {share.toFixed(0)}%
         </span>
