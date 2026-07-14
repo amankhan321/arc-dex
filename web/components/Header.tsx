@@ -12,13 +12,13 @@ export function Header() {
   const { data: pool } = usePool();
 
   return (
-    <header className="sticky top-0 z-30 border-b border-white/[0.06] bg-deep/60 backdrop-blur-xl">
+    <header className="sticky top-0 z-30 border-b border-white/[0.06] bg-base/70 backdrop-blur-xl">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-3.5">
         <Link href="/" className="group flex items-center gap-2.5">
           <motion.div
             whileHover={{ rotate: 8, scale: 1.08 }}
             transition={{ type: "spring", stiffness: 300, damping: 18 }}
-            className="h-[18px] w-[18px] rounded-[6px] bg-gradient-to-br from-accent to-bid"
+            className="h-[18px] w-[18px] rounded-[6px] bg-gradient-to-br from-indigo to-mint"
           />
           <span className="text-sm font-medium tracking-tight text-fg">
             ArcBook
@@ -45,14 +45,14 @@ export function Header() {
           {address ? (
             <button
               onClick={() => disconnect()}
-              className="glow-btn rounded-lg border border-white/10 px-3 py-1.5 font-mono text-xs tabular text-muted hover:text-fg"
+              className="btn border border-white/[0.1] px-3 py-1.5 font-mono text-xs tabular text-muted hover:text-fg"
             >
               {address.slice(0, 6)}…{address.slice(-4)}
             </button>
           ) : (
             <button
               onClick={() => connect({ connector: connectors[0] })}
-              className="glow-btn rounded-lg bg-fg px-3.5 py-1.5 text-xs font-medium text-deep"
+              className="btn btn-mint bg-fg px-3.5 py-1.5 text-xs font-medium text-base"
             >
               Connect
             </button>

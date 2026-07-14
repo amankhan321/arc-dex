@@ -1,50 +1,59 @@
-"use client";
-
-import { motion } from "framer-motion";
-
 /**
- * Two slow, enormous, barely-visible light sources drifting behind everything.
+ * The surface the whole app sits on.
  *
- * This is the trick that separates a premium dark UI from a black rectangle:
- * the background is never actually flat, it breathes. Opacity stays under 0.12
- * and the motion is slow enough that you feel it rather than watch it.
+ * Two enormous, heavily-blurred light sources drifting on long cycles, plus a
+ * grid that fades out toward the edges. Deliberately CSS keyframes rather than
+ * Framer: this runs for the entire session on every page, and it should cost
+ * the compositor nothing.
+ *
+ * The point is that the background is never flat. You shouldn't notice it —
+ * you should notice when it's missing.
  */
 export function Ambient() {
   return (
-    <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
-      <motion.div
-        aria-hidden
-        className="absolute -top-[20vh] left-[8%] h-[55vh] w-[55vh] rounded-full"
+    <div
+      aria-hidden
+      className="pointer-events-none fixed inset-0 overflow-hidden"
+      style={{ zIndex: -1 }}
+    >
+      <div
+        className="blob"
         style={{
+          top: "-22%",
+          left: "-8%",
+          width: 1100,
+          height: 1100,
           background:
-            "radial-gradient(circle, rgba(94,106,210,0.16), transparent 65%)",
-          filter: "blur(60px)",
+            "radial-gradient(circle, rgba(94,106,210,0.18) 0%, rgba(94,106,210,0.05) 45%, transparent 70%)",
+          filter: "blur(140px)",
+          animation: "float-a 18s ease-in-out infinite",
         }}
-        animate={{ x: [0, 60, -20, 0], y: [0, 30, 60, 0] }}
-        transition={{ duration: 34, repeat: Infinity, ease: "easeInOut" }}
       />
-      <motion.div
-        aria-hidden
-        className="absolute -top-[10vh] right-[6%] h-[45vh] w-[45vh] rounded-full"
+      <div
+        className="blob"
         style={{
+          top: "-10%",
+          right: "-12%",
+          width: 950,
+          height: 950,
           background:
-            "radial-gradient(circle, rgba(46,211,167,0.10), transparent 65%)",
-          filter: "blur(70px)",
+            "radial-gradient(circle, rgba(46,211,167,0.14) 0%, rgba(46,211,167,0.04) 45%, transparent 70%)",
+          filter: "blur(130px)",
+          animation: "float-b 15s ease-in-out infinite",
         }}
-        animate={{ x: [0, -50, 20, 0], y: [0, 50, 10, 0] }}
-        transition={{ duration: 42, repeat: Infinity, ease: "easeInOut" }}
       />
 
-      {/* Faint grid. Reads as "instrument", not "landing page". */}
       <div
-        aria-hidden
-        className="absolute inset-0 opacity-[0.025]"
+        className="absolute inset-0"
         style={{
+          opacity: 0.03,
           backgroundImage:
-            "linear-gradient(rgba(255,255,255,0.6) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.6) 1px, transparent 1px)",
-          backgroundSize: "64px 64px",
+            "linear-gradient(#fff 1px, transparent 1px), linear-gradient(90deg, #fff 1px, transparent 1px)",
+          backgroundSize: "72px 72px",
           maskImage:
-            "radial-gradient(ellipse 80% 50% at 50% 0%, black, transparent 75%)",
+            "radial-gradient(ellipse 70% 55% at 50% 30%, #000 20%, transparent 78%)",
+          WebkitMaskImage:
+            "radial-gradient(ellipse 70% 55% at 50% 30%, #000 20%, transparent 78%)",
         }}
       />
     </div>

@@ -9,7 +9,7 @@ export function Footer() {
       <div className="mx-auto flex max-w-6xl flex-col gap-8 sm:flex-row sm:items-start sm:justify-between">
         <div className="max-w-xs">
           <div className="flex items-center gap-2.5">
-            <div className="h-4 w-4 rounded-[5px] bg-gradient-to-br from-accent to-bid" />
+            <div className="h-4 w-4 rounded-[5px] bg-gradient-to-br from-indigo to-mint" />
             <span className="text-sm font-medium text-fg">ArcBook</span>
           </div>
           <p className="mt-3 text-xs leading-relaxed text-faint">

@@ -12,8 +12,10 @@ export type Quote = {
   limitTick: number;
 };
 
+const EASE = [0.16, 1, 0.3, 1] as const;
+
 /**
- * The whole thesis, in one component: an order arriving and splitting itself
+ * The whole thesis in one component: an order arriving and splitting itself
  * across two venues that price differently.
  *
  * Every other DEX on Arc can only draw the right-hand bar.
@@ -39,61 +41,42 @@ export function RouteSplit({
       : null;
 
   return (
-    <div className="glass mt-5 p-4">
-      <div className="mb-3 flex items-baseline justify-between">
-        <span className="text-[11px] uppercase tracking-[0.14em] text-muted">
+    <div className="inner mt-5 p-4">
+      <div className="mb-3.5 flex items-baseline justify-between">
+        <span className="text-[10px] uppercase tracking-[0.14em] text-faint">
           Route
         </span>
         {edge !== null && edge > 0.001 && (
           <motion.span
+            key={edge.toFixed(2)}
             initial={{ opacity: 0, y: -3 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-[11px] font-medium text-bid tabular"
+            transition={{ duration: 0.35, ease: EASE }}
+            className="font-mono text-[11px] font-medium tabular text-mint"
           >
             +{edge.toFixed(2)}% vs AMM alone
           </motion.span>
         )}
       </div>
 
-      {/* the split bar */}
       <div className="flex h-2 w-full gap-[3px] overflow-hidden rounded-full bg-white/[0.06]">
-        {bookPct > 0 && (
-          <motion.div
-            layout
-            initial={{ width: 0 }}
-            animate={{ width: `${bookPct}%` }}
-            transition={{ type: "spring", stiffness: 160, damping: 22 }}
-            className="h-full rounded-full bg-bid"
-          />
-        )}
-        {ammPct > 0 && (
-          <motion.div
-            layout
-            initial={{ width: 0 }}
-            animate={{ width: `${ammPct}%` }}
-            transition={{ type: "spring", stiffness: 160, damping: 22 }}
-            className="h-full rounded-full bg-accent"
-          />
-        )}
+        <motion.div
+          className="h-full rounded-full bg-mint"
+          animate={{ width: `${bookPct}%` }}
+          transition={{ type: "spring", stiffness: 130, damping: 24 }}
+          style={{ boxShadow: bookPct > 0 ? "0 0 12px rgba(46,211,167,0.5)" : "none" }}
+        />
+        <motion.div
+          className="h-full rounded-full bg-indigo"
+          animate={{ width: `${ammPct}%` }}
+          transition={{ type: "spring", stiffness: 130, damping: 24 }}
+          style={{ boxShadow: ammPct > 0 ? "0 0 12px rgba(94,106,210,0.5)" : "none" }}
+        />
       </div>
 
       <div className="mt-4 grid grid-cols-2 gap-3">
-        <Leg
-          label="Order book"
-          tone="bid"
-          share={bookPct}
-          inAmt={quote.bookIn}
-          outAmt={quote.bookOut}
-          outSymbol={outSymbol}
-        />
-        <Leg
-          label="StableSwap"
-          tone="accent"
-          share={ammPct}
-          inAmt={quote.ammIn}
-          outAmt={quote.ammOut}
-          outSymbol={outSymbol}
-        />
+        <Leg label="Order book" tone="mint" share={bookPct} inAmt={quote.bookIn} outAmt={quote.bookOut} outSymbol={outSymbol} />
+        <Leg label="StableSwap" tone="indigo" share={ammPct} inAmt={quote.ammIn} outAmt={quote.ammOut} outSymbol={outSymbol} />
       </div>
     </div>
   );
@@ -108,31 +91,30 @@ function Leg({
   outSymbol,
 }: {
   label: string;
-  tone: "bid" | "accent";
+  tone: "mint" | "indigo";
   share: number;
   inAmt: bigint;
   outAmt: bigint;
   outSymbol: string;
 }) {
-  const dot = tone === "bid" ? "bg-bid" : "bg-accent";
-  const dim = share < 0.5;
-
+  const dot = tone === "mint" ? "bg-mint" : "bg-indigo";
   return (
     <motion.div
-      animate={{ opacity: dim ? 0.35 : 1 }}
-      className="lift rounded-xl border border-white/[0.08] bg-white/[0.03] p-3"
+      animate={{ opacity: share < 0.5 ? 0.35 : 1 }}
+      transition={{ duration: 0.4, ease: EASE }}
+      className="rounded-[12px] border border-white/[0.07] bg-white/[0.02] p-3"
     >
       <div className="flex items-center gap-2">
         <span className={`h-1.5 w-1.5 rounded-full ${dot}`} />
         <span className="text-xs text-muted">{label}</span>
-        <span className="ml-auto text-xs tabular text-muted">
+        <span className="ml-auto font-mono text-xs tabular text-faint">
           {share.toFixed(0)}%
         </span>
       </div>
-      <div className="mt-2 text-sm tabular text-white">
-        {fmt(outAmt)} <span className="text-xs text-muted">{outSymbol}</span>
+      <div className="mt-2 font-mono text-sm tabular text-fg">
+        {fmt(outAmt)} <span className="text-[10px] text-faint">{outSymbol}</span>
       </div>
-      <div className="text-[11px] tabular text-muted">
+      <div className="font-mono text-[10px] tabular text-faint">
         from {fmt(inAmt)} in
       </div>
     </motion.div>

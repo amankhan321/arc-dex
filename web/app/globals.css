@@ -2,79 +2,219 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Design system: "Modern Dark" — the palette for fintech/trading surfaces.
-   No pure #000000 (OLED smear, and it reads cheap). Everything is layered
-   above a near-black base with hairline borders and one accent. */
+/* ============================================================
+   ArcBook design system
+   A trading instrument, not a landing page. Quiet, dense, expensive.
+   ============================================================ */
 :root {
-  --bg-deep: #020203;
-  --bg-base: #050506;
-  --bg-elevated: #0a0a0c;
-  --surface: rgba(255, 255, 255, 0.04);
-  --surface-hover: rgba(255, 255, 255, 0.06);
-  --foreground: #ededef;
-  --foreground-muted: #8a8f98;
-  --accent: #5e6ad2;
-  --accent-glow: rgba(94, 106, 210, 0.22);
-  --border: rgba(255, 255, 255, 0.08);
-  --border-strong: rgba(255, 255, 255, 0.14);
-  --radius: 16px;
+  /* Surface. Never #000 — OLED smears it and it reads cheap. */
+  --base: #0a0b0f;
+  --raise: #0e1015;
+  --sink: #07080b;
+
+  --fg: #edeef2;
+  --muted: #8a8f98;
+  --faint: #4d525c;
+
+  --indigo: #5e6ad2;
+  --mint: #2ed3a7;
+  --rose: #ff5c6c;
+
+  --line: rgba(255, 255, 255, 0.08);
+  --line-hot: rgba(46, 211, 167, 0.35);
+
+  /* The two shadows that make glass work. The inset top-edge highlight is the
+     specular; the drop shadow is what lifts the pane off the page. Without both
+     you have a translucent rectangle, not glass. */
+  --glass-shadow: 0 4px 24px rgba(0, 0, 0, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  --glass-shadow-hot: 0 16px 40px rgba(46, 211, 167, 0.12),
+    0 4px 24px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+
+  --r-panel: 16px;
+  --r-inner: 12px;
+
+  /* One easing curve for the entire app. Physical, never bouncy. */
   --ease: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-html, body {
-  background:
-    radial-gradient(120% 80% at 50% -10%, #0a0a0f 0%, transparent 55%),
-    linear-gradient(180deg, #0a0a0f 0%, var(--bg-deep) 60%);
-  background-attachment: fixed;
-  color: var(--foreground);
+html,
+body {
+  background: var(--base);
+  color: var(--fg);
   -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
-/* Frosted surface. The one visual motif the whole app is built from. */
+/* ---------- glass ---------- */
+
 .glass {
-  background: var(--surface);
+  position: relative;
+  border-radius: var(--r-panel);
+  border: 1px solid var(--line);
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.05),
+    rgba(255, 255, 255, 0.02)
+  );
   backdrop-filter: blur(20px) saturate(140%);
   -webkit-backdrop-filter: blur(20px) saturate(140%);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  position: relative;
+  box-shadow: var(--glass-shadow);
 }
 
-/* A single specular highlight along the top edge — this is what sells "glass"
-   rather than "translucent grey box". */
-.glass::before {
-  content: "";
-  position: absolute;
-  inset: 0 0 auto 0;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.16), transparent);
-  border-radius: var(--radius) var(--radius) 0 0;
-  pointer-events: none;
+.inner {
+  border-radius: var(--r-inner);
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.025);
+  transition: all 0.4s var(--ease);
 }
+.inner:hover {
+  background: rgba(255, 255, 255, 0.045);
+  border-color: rgba(255, 255, 255, 0.14);
+}
+
+/* ---------- lift ---------- */
 
 .lift {
-  transition: transform 0.4s var(--ease), border-color 0.4s var(--ease),
-    background 0.4s var(--ease);
+  transition: all 0.4s var(--ease);
+  will-change: transform;
 }
 .lift:hover {
-  transform: translateY(-2px);
-  border-color: var(--border-strong);
-  background: var(--surface-hover);
+  transform: translateY(-6px);
+  border-color: var(--line-hot);
+  box-shadow: var(--glass-shadow-hot);
 }
 
-.glow-btn {
+/* ---------- buttons ---------- */
+
+.btn {
+  transition: all 0.4s var(--ease);
+  border-radius: var(--r-inner);
+}
+.btn:hover:not(:disabled) {
+  box-shadow: 0 0 0 1px var(--indigo), 0 8px 32px -8px var(--indigo);
+}
+.btn:active:not(:disabled) {
+  transform: scale(0.975);
+}
+.btn-mint:hover:not(:disabled) {
+  box-shadow: 0 0 0 1px var(--mint), 0 8px 32px -8px var(--mint);
+}
+
+/* ---------- hero ---------- */
+
+/* Gradient fill that drifts. 12s is slow enough to feel like light moving
+   across a surface rather than an animation demanding attention. */
+.shimmer {
+  background: linear-gradient(
+    100deg,
+    var(--indigo) 0%,
+    var(--mint) 38%,
+    #9aa4ff 62%,
+    var(--indigo) 100%
+  );
+  background-size: 220% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: shimmer 12s linear infinite;
+}
+@keyframes shimmer {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 220% 50%; }
+}
+
+.pulse-dot {
   position: relative;
-  transition: transform 0.3s var(--ease), box-shadow 0.4s var(--ease);
 }
-.glow-btn:hover:not(:disabled) {
-  box-shadow: 0 0 0 1px var(--accent-glow), 0 8px 32px -8px var(--accent-glow);
+.pulse-dot::after {
+  content: "";
+  position: absolute;
+  inset: -4px;
+  border-radius: 9999px;
+  background: var(--mint);
+  opacity: 0.35;
+  animation: ping 2.4s var(--ease) infinite;
 }
-.glow-btn:active:not(:disabled) { transform: scale(0.975); }
+@keyframes ping {
+  0% { transform: scale(0.6); opacity: 0.5; }
+  70%, 100% { transform: scale(2.2); opacity: 0; }
+}
 
-.tabular { font-variant-numeric: tabular-nums; }
+/* ---------- ambient ---------- */
 
-.hairline { border: 1px solid var(--border); }
+.blob {
+  position: absolute;
+  border-radius: 9999px;
+  pointer-events: none;
+}
+@keyframes float-a {
+  0%, 100% { transform: translate(0, 0); }
+  33% { transform: translate(30px, -22px); }
+  66% { transform: translate(-18px, 26px); }
+}
+@keyframes float-b {
+  0%, 100% { transform: translate(0, 0); }
+  33% { transform: translate(-28px, 24px); }
+  66% { transform: translate(22px, -30px); }
+}
+
+/* ---------- data ---------- */
+
+.tabular {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
+}
+
+/* Order-book row: tint plus a left accent bar that grows in. The bar is what
+   makes the hover feel like a selection rather than a highlight. */
+.row {
+  position: relative;
+  transition: background 0.25s var(--ease);
+}
+.row::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 10%;
+  bottom: 10%;
+  width: 2px;
+  border-radius: 2px;
+  transform: scaleY(0);
+  transition: transform 0.3s var(--ease);
+}
+.row:hover { background: rgba(255, 255, 255, 0.04); }
+.row:hover::before { transform: scaleY(1); }
+.row-bid::before { background: var(--mint); }
+.row-ask::before { background: var(--rose); }
+
+/* Live cards breathe, very faintly. Reads as "this number is alive". */
+@keyframes glow-pulse {
+  0%, 100% { box-shadow: var(--glass-shadow); }
+  50% {
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.35),
+      inset 0 1px 0 rgba(255, 255, 255, 0.06),
+      0 0 24px -6px rgba(94, 106, 210, 0.28);
+  }
+}
+.alive { animation: glow-pulse 5.5s ease-in-out infinite; }
 
 ::-webkit-scrollbar { width: 6px; height: 6px; }
-::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
-::selection { background: var(--accent-glow); }
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+}
+::selection { background: rgba(94, 106, 210, 0.32); }
+
+/* ---------- accessibility ---------- */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+  .lift:hover { transform: none; }
+}
