@@ -4,6 +4,7 @@ import { Providers } from "@/components/Providers";
 import { Ambient } from "@/components/Ambient";
 import { CursorGlow } from "@/components/CursorGlow";
 import { Footer } from "@/components/Footer";
+import { Ticker } from "@/components/Ticker";
 
 export const metadata: Metadata = {
   title: "ArcBook — the first on-chain order book on Arc",
@@ -34,6 +35,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <CursorGlow />
         <Providers>
           <div className="relative z-10 flex min-h-screen flex-col">
+            <Ticker />
             <div className="flex-1">{children}</div>
             <Footer />
           </div>

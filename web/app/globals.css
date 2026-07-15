@@ -8,9 +8,12 @@
    ============================================================ */
 :root {
   /* Surface. Never #000 — OLED smears it and it reads cheap. */
-  --base: #0a0b0f;
-  --raise: #0e1015;
-  --sink: #07080b;
+  /* Warmer near-black with a faint blue-violet cast, and cards a real step
+     lighter so they read as lifted rather than same-grey-on-grey. The flat
+     look came from base and cards being nearly identical — this separates them. */
+  --base: #0b0b12;
+  --raise: #14141f;
+  --sink: #08080e;
 
   --fg: #edeef2;
   --muted: #8a8f98;
@@ -57,7 +60,8 @@ body::before {
   inset: 0;
   z-index: -3;
   background:
-    radial-gradient(130% 90% at 50% -20%, #10121a 0%, transparent 55%),
+    radial-gradient(120% 80% at 50% -15%, #191634 0%, transparent 50%),
+    radial-gradient(90% 60% at 85% 10%, #0f1a1f 0%, transparent 55%),
     var(--base);
   pointer-events: none;
 }
@@ -69,9 +73,10 @@ body::before {
   border-radius: var(--r-panel);
   border: 1px solid rgba(255, 255, 255, 0.11);
   background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.05),
-    rgba(255, 255, 255, 0.02)
+    160deg,
+    rgba(124, 132, 255, 0.06),
+    rgba(255, 255, 255, 0.02) 40%,
+    rgba(255, 255, 255, 0.015)
   );
   backdrop-filter: blur(20px) saturate(140%);
   -webkit-backdrop-filter: blur(20px) saturate(140%);
@@ -238,3 +243,27 @@ body::before {
   }
   .lift:hover { transform: none; }
 }
+
+
+/* Price tick flash — a real-exchange touch. When a live number changes, its cell
+   pulses green (up) or red (down) for a beat, then settles. */
+@keyframes flash-up {
+  0% { background: rgba(46, 211, 167, 0.22); }
+  100% { background: transparent; }
+}
+@keyframes flash-down {
+  0% { background: rgba(255, 92, 108, 0.22); }
+  100% { background: transparent; }
+}
+.flash-up { animation: flash-up 0.6s ease-out; }
+.flash-down { animation: flash-down 0.6s ease-out; }
+
+/* Marquee for the ticker rail (used if we switch to seamless scroll). */
+@keyframes marquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+/* Hide the horizontal scrollbar on the ticker rail without disabling scroll. */
+.scrollbar-none { -ms-overflow-style: none; scrollbar-width: none; }
+.scrollbar-none::-webkit-scrollbar { display: none; }
