@@ -1,54 +1,116 @@
 "use client";
 
-import { motion, useReducedMotion } from "framer-motion";
+import { motion, useReducedMotion, type Variants } from "framer-motion";
 import type { ReactNode } from "react";
 
 const EASE = [0.16, 1, 0.3, 1] as const;
 
-/** Siblings rise in sequence. 70ms apart — enough to read as a cascade, not a queue. */
+/**
+ * Stagger — reveals children in sequence.
+ *
+ * `whenInView` (default true) switches the trigger from on-mount to
+ * on-scroll-into-view: it fires once, when the block is ~120px into the
+ * viewport, and never re-hides on scroll-up. Set it false for above-the-fold
+ * blocks (the hero) that should animate immediately on load.
+ */
 export function Stagger({
   children,
-  gap = 0.04,
+  gap = 0.08,
   className,
+  whenInView = true,
 }: {
   children: ReactNode;
   gap?: number;
   className?: string;
+  whenInView?: boolean;
 }) {
   const still = useReducedMotion();
+  const trigger = whenInView
+    ? { whileInView: "show", viewport: { once: true, margin: "-120px" } as const }
+    : { animate: "show" as const };
+
   return (
     <motion.div
       className={className}
       initial={still ? false : "hidden"}
-      animate="show"
-      variants={{ show: { transition: { staggerChildren: gap } } }}
+      {...trigger}
+      variants={{ show: { transition: { staggerChildren: still ? 0 : gap } } }}
     >
       {children}
     </motion.div>
   );
 }
 
+/**
+ * Rise — one element fading up from +y. Drop inside a Stagger and it inherits
+ * the cascade; use standalone with `solo` to reveal on its own scroll trigger.
+ */
 export function Rise({
   children,
   className,
-  y = 10,
+  y = 32,
+  solo = false,
 }: {
   children: ReactNode;
   className?: string;
   y?: number;
+  solo?: boolean;
 }) {
   const still = useReducedMotion();
+
+  const variants: Variants = {
+    hidden: { opacity: 0, y: still ? 0 : y },
+    show: {
+      opacity: 1,
+      y: 0,
+      transition: { duration: 0.6, ease: EASE },
+    },
+  };
+
+  if (solo) {
+    return (
+      <motion.div
+        className={className}
+        initial={still ? false : "hidden"}
+        whileInView="show"
+        viewport={{ once: true, margin: "-100px" }}
+        variants={variants}
+      >
+        {children}
+      </motion.div>
+    );
+  }
+
+  return (
+    <motion.div className={className} variants={variants}>
+      {children}
+    </motion.div>
+  );
+}
+
+/**
+ * Float — gentle infinite up-down drift for decorative "living" elements.
+ * Purely aesthetic; fully disabled under reduced-motion.
+ */
+export function Float({
+  children,
+  className,
+  distance = 6,
+  duration = 6,
+}: {
+  children: ReactNode;
+  className?: string;
+  distance?: number;
+  duration?: number;
+}) {
+  const still = useReducedMotion();
+  if (still) return <div className={className}>{children}</div>;
+
   return (
     <motion.div
       className={className}
-      variants={{
-        hidden: { opacity: 0, y: still ? 0 : y },
-        show: {
-          opacity: 1,
-          y: 0,
-          transition: { duration: 0.35, ease: EASE },
-        },
-      }}
+      animate={{ y: [0, -distance, 0] }}
+      transition={{ duration, repeat: Infinity, ease: "easeInOut" }}
     >
       {children}
     </motion.div>

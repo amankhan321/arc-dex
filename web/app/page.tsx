@@ -10,6 +10,8 @@ import { BookLadder } from "@/components/BookLadder";
 import { LimitPanel } from "@/components/LimitPanel";
 import { TwapPanel } from "@/components/TwapPanel";
 import { Rise, Stagger } from "@/components/Reveal";
+import { CountUp } from "@/components/CountUp";
+import { Float } from "@/components/Reveal";
 import { usePool } from "@/lib/useBook";
 import { fmt } from "@/lib/contracts";
 
@@ -30,7 +32,7 @@ export default function Page() {
       <Header />
 
       <main className="mx-auto max-w-6xl px-6 pt-12 sm:pt-16">
-        <Stagger gap={0.08} className="grid items-start gap-6 lg:grid-cols-[1fr_0.92fr]">
+        <Stagger gap={0.08} whenInView={false} className="grid items-start gap-6 lg:grid-cols-[1fr_0.92fr]">
           {/* -------- terminal, top-left -------- */}
           <Rise>
             <div className="glass lift p-6">
@@ -78,12 +80,14 @@ export default function Page() {
           {/* -------- pitch, top-right -------- */}
           <div className="lg:pt-2">
             <Rise>
-              <div className="inline-flex items-center gap-2.5 rounded-full border border-mint/25 bg-mint/[0.06] px-3 py-1.5">
-                <span className="pulse-dot h-1.5 w-1.5 rounded-full bg-mint" />
-                <span className="text-[10px] font-medium uppercase tracking-[0.16em] text-mint">
-                  Live on Arc Testnet
-                </span>
-              </div>
+              <Float distance={4} duration={5}>
+                <div className="inline-flex items-center gap-2.5 rounded-full border border-mint/25 bg-mint/[0.06] px-3 py-1.5">
+                  <span className="pulse-dot h-1.5 w-1.5 rounded-full bg-mint" />
+                  <span className="text-[10px] font-medium uppercase tracking-[0.16em] text-mint">
+                    Live on Arc Testnet
+                  </span>
+                </div>
+              </Float>
             </Rise>
 
             <Rise>
@@ -141,15 +145,16 @@ export default function Page() {
                   </p>
                 ))}
               <div className="mt-8 grid grid-cols-2 gap-3">
-                <Stat label="Curve price" value={pool ? pool.ammPrice.toFixed(5) : "—"} sub="EURC per USDC" live />
-                <Stat
+                <StatNum label="Curve price" value={pool?.ammPrice} format={(n) => n.toFixed(5)} sub="EURC per USDC" live />
+                <StatNum
                   label="LP value"
-                  value={pool ? (Number(pool.virtualPrice) / 1e18).toFixed(6) : "—"}
+                  value={pool ? Number(pool.virtualPrice) / 1e18 : undefined}
+                  format={(n) => n.toFixed(6)}
                   sub="virtual price"
                   live
                 />
-                <Stat label="Pool USDC" value={pool ? fmt(pool.balance0, 2) : "—"} sub="reserve" />
-                <Stat label="Pool EURC" value={pool ? fmt(pool.balance1, 2) : "—"} sub="reserve" />
+                <StatNum label="Pool USDC" value={pool ? Number(pool.balance0) / 1e6 : undefined} format={(n) => n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} sub="reserve" />
+                <StatNum label="Pool EURC" value={pool ? Number(pool.balance1) / 1e6 : undefined} format={(n) => n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} sub="reserve" />
               </div>
             </Rise>
           </div>
@@ -166,21 +171,25 @@ export default function Page() {
   );
 }
 
-function Stat({
+function StatNum({
   label,
   value,
+  format,
   sub,
   live,
 }: {
   label: string;
-  value: string;
+  value: number | undefined;
+  format: (n: number) => string;
   sub: string;
   live?: boolean;
 }) {
   return (
     <div className={`glass lift px-4 py-3 ${live ? "alive" : ""}`}>
       <div className="text-[10px] uppercase tracking-[0.14em] text-faint">{label}</div>
-      <div className="mt-1.5 font-mono text-base tabular text-fg">{value}</div>
+      <div className="mt-1.5 font-mono text-base tabular text-fg">
+        {value == null ? "—" : <CountUp value={value} format={format} />}
+      </div>
       <div className="text-[10px] text-faint">{sub}</div>
     </div>
   );
