@@ -24,6 +24,8 @@ export function useBook(refetchMs = 3000) {
     queryKey: ["book"],
     refetchInterval: refetchMs,
     enabled: !!client,
+    retry: 3,
+    retryDelay: (n) => Math.min(1000 * 2 ** n, 5000),
     queryFn: async () => {
       if (!client) return { bids: [], asks: [] };
 
@@ -87,6 +89,7 @@ export function usePool(refetchMs = 5000) {
         ammPrice: Number(mid) / 1e6, // EURC per 1 USDC
       };
     },
-    retry: 2,
+    retry: 3,
+    retryDelay: (n) => Math.min(1000 * 2 ** n, 5000),
   });
 }

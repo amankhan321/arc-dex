@@ -3,22 +3,26 @@ import { injected } from "wagmi/connectors";
 import { arcTestnet } from "./contracts";
 
 /**
- * Reads go STRAIGHT to the Arc RPC from the browser. This is the configuration
- * that demonstrably worked on first deploy — the RPC serves browsers fine.
+ * Reads go straight to the Arc RPC — the config that works. The extra options
+ * here are about RESILIENCE, which is what "HTTP request failed" was: the
+ * endpoint occasionally times out or throttles, and with no retry a single
+ * blip killed the whole quote. Now each call retries a few times with backoff
+ * and a generous timeout before it's allowed to fail.
  *
- * History, so nobody "improves" this again: a proxy-first fallback stack was
- * layered in here to work around a CORS block that turned out not to exist
- * (the 403 came from a dev sandbox's own egress proxy). The added indirection
- * then became its own failure mode. The real production bug was reads
- * following the wallet's chain — fixed by pinning chainId at every call site,
- * not by anything in this file. /api/rpc still exists as a documented backup;
- * nothing uses it by default.
+ * Writes never use this transport — they go through the connected wallet.
  */
 export const wagmiConfig = createConfig({
   chains: [arcTestnet],
   connectors: [injected()],
   transports: {
-    [arcTestnet.id]: http("https://rpc.testnet.arc.network"),
+    [arcTestnet.id]: http("https://rpc.testnet.arc.network", {
+      retryCount: 3,
+      retryDelay: 400,
+      timeout: 15_000,
+      // Batch multicalls so a page load is a couple of requests, not a dozen —
+      // fewer requests, fewer chances to hit a throttle.
+      batch: true,
+    }),
   },
   ssr: true,
 });
