@@ -3,15 +3,11 @@
 import { useEffect, useRef } from "react";
 
 /**
- * A light source that follows the cursor.
- *
- * One fixed element, moved with translate3d inside requestAnimationFrame with
- * gentle lerp — the glow trails the pointer slightly, which reads as light with
- * mass rather than a div glued to the mouse. No React re-renders, no listeners
- * per card, nothing on the main thread beyond one rAF.
- *
- * Skipped entirely on touch devices (no cursor to follow) and for
- * prefers-reduced-motion.
+ * A light source that follows the cursor — sized to the screen, not a constant.
+ * min(380px, 34vw) so it reads as a soft local glow on any display instead of a
+ * floodlight on smaller ones. Moved with translate3d inside one rAF with lerp,
+ * so it trails slightly: light with mass, not a div glued to the mouse.
+ * No React re-renders. Skipped on touch devices and reduced-motion.
  */
 export function CursorGlow() {
   const ref = useRef<HTMLDivElement>(null);
@@ -34,9 +30,11 @@ export function CursorGlow() {
     const leave = () => { el.style.opacity = "0"; };
 
     const tick = () => {
-      x += (tx - x) * 0.12;
-      y += (ty - y) * 0.12;
-      el.style.transform = `translate3d(${x - 350}px, ${y - 350}px, 0)`;
+      x += (tx - x) * 0.14;
+      y += (ty - y) * 0.14;
+      // Center on the cursor whatever the current rendered size is.
+      const half = el.offsetWidth / 2;
+      el.style.transform = `translate3d(${x - half}px, ${y - half}px, 0)`;
       raf = requestAnimationFrame(tick);
     };
 
@@ -55,11 +53,13 @@ export function CursorGlow() {
     <div
       ref={ref}
       aria-hidden
-      className="pointer-events-none fixed left-0 top-0 h-[700px] w-[700px] opacity-0 transition-opacity duration-500"
+      className="pointer-events-none fixed left-0 top-0 opacity-0 transition-opacity duration-500"
       style={{
         zIndex: -1,
+        width: "min(380px, 34vw)",
+        height: "min(380px, 34vw)",
         background:
-          "radial-gradient(circle, rgba(94,106,210,0.22) 0%, rgba(46,211,167,0.10) 38%, transparent 68%)",
+          "radial-gradient(circle, rgba(94,106,210,0.16) 0%, rgba(46,211,167,0.07) 40%, transparent 68%)",
       }}
     />
   );

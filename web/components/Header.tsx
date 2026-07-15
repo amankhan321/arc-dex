@@ -9,7 +9,7 @@ export function Header() {
   const { address } = useAccount();
   const { connect, connectors } = useConnect();
   const { disconnect } = useDisconnect();
-  const { data: pool } = usePool();
+  const { data: pool, error: poolError, isLoading: poolLoading } = usePool();
 
   return (
     <header className="sticky top-0 z-30 border-b border-white/[0.06] bg-base/70 backdrop-blur-xl">
@@ -34,6 +34,20 @@ export function Header() {
         </nav>
 
         <div className="flex items-center gap-4">
+          {/* One glance = full diagnosis. Green: reads flowing. Amber: loading.
+              Red: the RPC path is down — hover for the actual error. */}
+          <span
+            title={
+              poolError
+                ? `RPC error: ${poolError.message.slice(0, 200)}`
+                : pool
+                  ? "RPC connected"
+                  : "RPC connecting…"
+            }
+            className={`h-1.5 w-1.5 rounded-full ${
+              poolError ? "bg-rose" : pool ? "bg-mint" : "bg-yellow-500"
+            }`}
+          />
           {pool && (
             <span className="hidden font-mono text-[11px] tabular text-faint lg:block">
               vprice{" "}

@@ -2,7 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { usePublicClient } from "wagmi";
-import { ADDR, bookAbi, poolAbi, priceOf } from "./contracts";
+import { ADDR, arcTestnet, bookAbi, poolAbi, priceOf } from "./contracts";
 
 export type Level = { tick: number; price: number; size: bigint };
 export type Book = { bids: Level[]; asks: Level[] };
@@ -15,7 +15,10 @@ const MAX_LEVELS = 12;
  * The book IS the contract.
  */
 export function useBook(refetchMs = 3000) {
-  const client = usePublicClient();
+  // Pinned to Arc explicitly. Without this, usePublicClient() follows the
+  // WALLET's chain — and if the wallet sits on mainnet (or anything not in our
+  // config) it returns undefined and every read on the page silently dies.
+  const client = usePublicClient({ chainId: arcTestnet.id });
 
   return useQuery<Book>({
     queryKey: ["book"],
@@ -51,7 +54,10 @@ export function useBook(refetchMs = 3000) {
 }
 
 export function usePool(refetchMs = 5000) {
-  const client = usePublicClient();
+  // Pinned to Arc explicitly. Without this, usePublicClient() follows the
+  // WALLET's chain — and if the wallet sits on mainnet (or anything not in our
+  // config) it returns undefined and every read on the page silently dies.
+  const client = usePublicClient({ chainId: arcTestnet.id });
 
   return useQuery({
     queryKey: ["pool"],
@@ -81,5 +87,6 @@ export function usePool(refetchMs = 5000) {
         ammPrice: Number(mid) / 1e6, // EURC per 1 USDC
       };
     },
+    retry: 2,
   });
 }

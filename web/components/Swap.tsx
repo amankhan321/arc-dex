@@ -3,12 +3,12 @@
 import { useEffect, useState } from "react";
 import { ArrowDown } from "lucide-react";
 import { useAccount, usePublicClient, useWriteContract } from "wagmi";
-import { ADDR, erc20Abi, fmt, parse, poolAbi, quoterAbi, routerAbi } from "@/lib/contracts";
+import { ADDR, arcTestnet, erc20Abi, fmt, parse, poolAbi, quoterAbi, routerAbi } from "@/lib/contracts";
 import { RouteSplit, type Quote } from "./RouteSplit";
 
 export function Swap() {
   const { address } = useAccount();
-  const client = usePublicClient();
+  const client = usePublicClient({ chainId: arcTestnet.id });
   const { writeContractAsync, isPending } = useWriteContract();
 
   const [zeroForOne, setZeroForOne] = useState(true);
@@ -68,6 +68,7 @@ export function Swap() {
         abi: erc20Abi,
         functionName: "approve",
         args: [ADDR.router as `0x${string}`, amountIn],
+        chainId: arcTestnet.id,
       });
 
       const minOut = (quote.expectedOut * 995n) / 1000n; // 0.5% floor
@@ -79,6 +80,7 @@ export function Swap() {
         abi: routerAbi,
         functionName: "swapExactIn",
         args: [zeroForOne, amountIn, quote.bookIn, minOut, quote.limitTick, 30, deadline, address],
+        chainId: arcTestnet.id,
       });
       setStatus(`Filled · ${hash.slice(0, 10)}…`);
     } catch (e) {

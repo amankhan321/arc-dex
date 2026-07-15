@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useAccount, useWriteContract } from "wagmi";
-import { ADDR, erc20Abi, parse, twapAbi } from "@/lib/contracts";
+import { ADDR, arcTestnet, erc20Abi, parse, twapAbi } from "@/lib/contracts";
 
 /**
  * The primitive no other Arc DEX has: work a large FX order through the market
@@ -42,6 +42,7 @@ export function TwapPanel() {
         abi: erc20Abi,
         functionName: "approve",
         args: [ADDR.twap as `0x${string}`, amount],
+        chainId: arcTestnet.id,
       });
 
       setStatus("Scheduling…");
@@ -50,6 +51,7 @@ export function TwapPanel() {
         abi: twapAbi,
         functionName: "createTwap",
         args: [zeroForOne, amount, n, interval, minPriceX18],
+        chainId: arcTestnet.id,
       });
       setStatus(`Scheduled · ${hash.slice(0, 10)}…`);
     } catch (e) {

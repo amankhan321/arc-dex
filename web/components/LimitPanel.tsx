@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { useAccount, useWriteContract } from "wagmi";
-import { ADDR, bookAbi, erc20Abi, parse, tickOf } from "@/lib/contracts";
+import { ADDR, arcTestnet, bookAbi, erc20Abi, parse, tickOf } from "@/lib/contracts";
 
 export function LimitPanel() {
   const { address } = useAccount();
@@ -33,6 +33,7 @@ export function LimitPanel() {
         abi: erc20Abi,
         functionName: "approve",
         args: [ADDR.book as `0x${string}`, escrow],
+        chainId: arcTestnet.id,
       });
 
       setStatus("Resting order…");
@@ -41,6 +42,7 @@ export function LimitPanel() {
         abi: bookAbi,
         functionName: "placeOrder",
         args: [isBid, tick, baseAmount],
+        chainId: arcTestnet.id,
       });
       setStatus(`Resting · ${hash.slice(0, 10)}…`);
     } catch (e) {
@@ -60,6 +62,7 @@ export function LimitPanel() {
         address: ADDR.book as `0x${string}`,
         abi: bookAbi,
         functionName: "claim",
+        chainId: arcTestnet.id,
       });
       setStatus("Claimed");
     } catch {
