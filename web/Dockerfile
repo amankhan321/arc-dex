@@ -12,7 +12,8 @@ COPY . .
 ENV NEXT_TELEMETRY_DISABLED=1
 # Guarantee a public dir exists so the runtime COPY below can't fail on a repo
 # that happens to have no static assets.
-RUN mkdir -p public && npm run build
+RUN mkdir -p public && npm run build \
+ && test -d .next/standalone || (echo 'ERROR: .next/standalone missing — is output:"standalone" set in next.config and are there no duplicate config files?' && exit 1)
 
 # ---- run ----
 FROM node:22-alpine AS run
