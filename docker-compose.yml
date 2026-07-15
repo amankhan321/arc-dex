@@ -1,8 +1,21 @@
-# DigitalOcean droplet deployment.
+# ArcBook droplet stack: frontend + TLS + keeper.
 #
-# Caddy sits in front and gets you an automatic, auto-renewing Let's Encrypt
-# certificate just by naming a domain — no certbot, no cron, no expiry surprise.
+#   cp .env.example .env       # put the updater PRIVATE_KEY in .env
+#   docker compose up -d --build
+#
+# The keeper is the piece that actually NEEDS a server: it feeds the
+# GuardedRateProvider (which halts the AMM if no rate lands within 6h — by
+# design) and cranks due TWAP slices. The frontend can live here too or stay
+# on Vercel; both work, and the keeper doesn't care.
 services:
+  keeper:
+    build: ./keeper
+    restart: unless-stopped
+    env_file: .env
+    logging:
+      driver: json-file
+      options: { max-size: "10m", max-file: "3" }
+
   web:
     build: ./web
     restart: unless-stopped
@@ -15,6 +28,8 @@ services:
     ports:
       - "80:80"
       - "443:443"
+    environment:
+      - SITE_ADDRESS=${SITE_ADDRESS:-:80}
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
       - caddy_data:/data

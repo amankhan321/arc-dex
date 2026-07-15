@@ -53,7 +53,11 @@ export function Swap() {
         if (!stale) {
           setQuote(null);
           const m = e instanceof Error ? e.message : "quote failed";
-          setStatus(`quote error: ${m.split("\n")[0].slice(0, 120)}`);
+          setStatus(
+            m.includes("0xec30f4ab")
+              ? "FX oracle stale — swaps paused by design until the next rate update"
+              : `quote error: ${m.split("\n")[0].slice(0, 120)}`,
+          );
         }
       }
     })();

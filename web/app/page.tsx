@@ -126,11 +126,20 @@ export default function Page() {
             </Rise>
 
             <Rise>
-              {poolError && (
-                <p className="mt-4 break-words rounded-[12px] border border-rose/30 bg-rose/[0.06] p-3 font-mono text-[11px] leading-relaxed text-rose">
-                  RPC error: {poolError.message.slice(0, 220)}
-                </p>
-              )}
+              {poolError &&
+                (poolError.message.includes("0xec30f4ab") ? (
+                  <p className="mt-4 rounded-[12px] border border-yellow-500/30 bg-yellow-500/[0.06] p-3 text-[12px] leading-relaxed text-yellow-500/90">
+                    FX oracle is stale, so swaps are paused — that&apos;s the
+                    safety design, not an outage: the pool halts rather than
+                    price off a dead feed. The order book stays live and LPs
+                    can always withdraw. Trading resumes on the next rate
+                    update.
+                  </p>
+                ) : (
+                  <p className="mt-4 break-words rounded-[12px] border border-rose/30 bg-rose/[0.06] p-3 font-mono text-[11px] leading-relaxed text-rose">
+                    RPC error: {poolError.message.slice(0, 220)}
+                  </p>
+                ))}
               <div className="mt-8 grid grid-cols-2 gap-3">
                 <Stat label="Curve price" value={pool ? pool.ammPrice.toFixed(5) : "—"} sub="EURC per USDC" live />
                 <Stat
