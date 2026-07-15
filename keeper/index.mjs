@@ -49,7 +49,14 @@ const twapAbi = [
 // staticNetwork avoids a chain-id round-trip on every call; the retry wrapper
 // below is what actually survives a flaky endpoint (the "missing revert data"
 // was a dropped read with no retry, not a bad ABI).
-const provider = new ethers.JsonRpcProvider(RPC, undefined, { staticNetwork: true });
+// batchMaxCount: 1 forces one eth_call per request. This RPC intermittently
+// drops BATCHED calls (ethers bundles Promise.all reads into a single JSON-RPC
+// batch), which ethers reports as the maximally-unhelpful "missing revert
+// data". One call per request is a hair chattier and actually works.
+const provider = new ethers.JsonRpcProvider(RPC, undefined, {
+  staticNetwork: true,
+  batchMaxCount: 1,
+});
 
 async function withRetry(label, fn, tries = 4) {
   let lastErr;
@@ -84,12 +91,12 @@ async function eurUsd() {
 }
 
 async function tendRate() {
-  const [cur, at, minGap] = await withRetry("read rate state", () =>
-    Promise.all([rp.rate(), rp.updatedAt(), rp.MIN_UPDATE_INTERVAL()]),
-  );
+  const cur = await withRetry("rate()", () => rp.rate());
+  const at = await withRetry("updatedAt()", () => rp.updatedAt());
   const now = Math.floor(Date.now() / 1000);
   const age = now - Number(at);
-  if (age < Number(minGap)) return; // contract cooldown; nothing to do yet
+  const MIN_GAP = 5 * 60; // MIN_UPDATE_INTERVAL is a compile-time constant
+  if (age < MIN_GAP) return; // contract cooldown; nothing to do yet
 
   const market = await eurUsd();
   const target = BigInt(Math.round(market * 1e6)) * 10n ** 12n;

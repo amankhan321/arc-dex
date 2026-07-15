@@ -19,9 +19,10 @@ export const wagmiConfig = createConfig({
       retryCount: 3,
       retryDelay: 400,
       timeout: 15_000,
-      // Batch multicalls so a page load is a couple of requests, not a dozen —
-      // fewer requests, fewer chances to hit a throttle.
-      batch: true,
+      // NOT batched: this RPC intermittently drops batched eth_calls (surfaced
+      // as 'HTTP request failed' / 'missing revert data'). One call per request
+      // is chattier but reliable.
+      batch: false,
     }),
   },
   ssr: true,
