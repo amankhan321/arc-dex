@@ -22,7 +22,7 @@ type Tab = (typeof TABS)[number];
  * where the eye lands, the pitch stands beside it, the book completes the row.
  */
 export default function Page() {
-  const { data: pool } = usePool();
+  const { data: pool, error: poolError } = usePool();
   const [tab, setTab] = useState<Tab>("Swap");
 
   return (
@@ -126,6 +126,11 @@ export default function Page() {
             </Rise>
 
             <Rise>
+              {poolError && (
+                <p className="mt-4 break-words rounded-[12px] border border-rose/30 bg-rose/[0.06] p-3 font-mono text-[11px] leading-relaxed text-rose">
+                  RPC error: {poolError.message.slice(0, 220)}
+                </p>
+              )}
               <div className="mt-8 grid grid-cols-2 gap-3">
                 <Stat label="Curve price" value={pool ? pool.ammPrice.toFixed(5) : "—"} sub="EURC per USDC" live />
                 <Stat

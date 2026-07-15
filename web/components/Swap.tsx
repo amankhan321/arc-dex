@@ -49,8 +49,12 @@ export function Swap() {
         const r = q as unknown as Quote;
         setQuote({ ...r, limitTick: Number(r.limitTick) });
         setAmmOnly(a as bigint);
-      } catch {
-        if (!stale) setQuote(null);
+      } catch (e) {
+        if (!stale) {
+          setQuote(null);
+          const m = e instanceof Error ? e.message : "quote failed";
+          setStatus(`quote error: ${m.split("\n")[0].slice(0, 120)}`);
+        }
       }
     })();
     return () => {
