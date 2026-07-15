@@ -14,7 +14,7 @@ export function Ambient() {
     <div
       aria-hidden
       className="pointer-events-none fixed inset-0 overflow-hidden"
-      style={{ zIndex: -1 }}
+      style={{ zIndex: -2 }}
     >
       <div
         className="blob"

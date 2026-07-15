@@ -59,7 +59,7 @@ export function CursorGlow() {
       style={{
         zIndex: -1,
         background:
-          "radial-gradient(circle, rgba(94,106,210,0.10) 0%, rgba(46,211,167,0.05) 35%, transparent 65%)",
+          "radial-gradient(circle, rgba(94,106,210,0.22) 0%, rgba(46,211,167,0.10) 38%, transparent 68%)",
       }}
     />
   );

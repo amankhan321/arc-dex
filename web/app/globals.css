@@ -38,12 +38,28 @@
   --ease: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-html,
-body {
+html {
   background: var(--base);
+}
+body {
   color: var(--fg);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+}
+
+/* Deepest layer: the base tint. Sits at z -3 so the ambient blobs (-2) and the
+   cursor glow (-1) all render ABOVE it and are visible, while still being behind
+   every scrap of real content. Putting the base color on <body> instead would
+   paint over the glow — which is exactly why it looked like nothing happened. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -3;
+  background:
+    radial-gradient(130% 90% at 50% -20%, #10121a 0%, transparent 55%),
+    var(--base);
+  pointer-events: none;
 }
 
 /* ---------- glass ---------- */
