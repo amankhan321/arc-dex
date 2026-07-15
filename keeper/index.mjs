@@ -46,7 +46,23 @@ const twapAbi = [
   "function crank(uint256 id, uint256 bookAmountIn, uint32 limitTick, uint16 maxOrders) returns (uint256)",
 ];
 
-const provider = new ethers.JsonRpcProvider(RPC);
+// staticNetwork avoids a chain-id round-trip on every call; the retry wrapper
+// below is what actually survives a flaky endpoint (the "missing revert data"
+// was a dropped read with no retry, not a bad ABI).
+const provider = new ethers.JsonRpcProvider(RPC, undefined, { staticNetwork: true });
+
+async function withRetry(label, fn, tries = 4) {
+  let lastErr;
+  for (let i = 0; i < tries; i++) {
+    try {
+      return await fn();
+    } catch (e) {
+      lastErr = e;
+      await new Promise((r) => setTimeout(r, 500 * (i + 1)));
+    }
+  }
+  throw new Error(`${label}: ${lastErr?.shortMessage ?? lastErr?.message ?? lastErr}`);
+}
 const wallet = new ethers.Wallet(PK, provider);
 const rp = new ethers.Contract(RATE_PROVIDER, rpAbi, wallet);
 const twap = new ethers.Contract(TWAP, twapAbi, wallet);
@@ -68,11 +84,9 @@ async function eurUsd() {
 }
 
 async function tendRate() {
-  const [cur, at, minGap] = await Promise.all([
-    rp.rate(),
-    rp.updatedAt(),
-    rp.MIN_UPDATE_INTERVAL(),
-  ]);
+  const [cur, at, minGap] = await withRetry("read rate state", () =>
+    Promise.all([rp.rate(), rp.updatedAt(), rp.MIN_UPDATE_INTERVAL()]),
+  );
   const now = Math.floor(Date.now() / 1000);
   const age = now - Number(at);
   if (age < Number(minGap)) return; // contract cooldown; nothing to do yet
@@ -103,7 +117,7 @@ async function tendRate() {
 }
 
 async function crankTwaps() {
-  const n = Number(await twap.nextTwapId());
+  const n = Number(await withRetry("read nextTwapId", () => twap.nextTwapId()));
   const now = Math.floor(Date.now() / 1000);
 
   for (let id = 1; id < n; id++) {
@@ -134,7 +148,7 @@ for (;;) {
     await tendRate();
     await crankTwaps();
   } catch (e) {
-    console.error("loop error:", e.shortMessage ?? e.message);
+    console.error("loop error:", e.message ?? e);
   }
   await new Promise((r) => setTimeout(r, LOOP_MS));
 }
