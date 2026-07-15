@@ -1,9 +1,10 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
+import { ArrowUpRight } from "lucide-react";
 import { Header } from "@/components/Header";
-import { Hero } from "@/components/Hero";
 import { Swap } from "@/components/Swap";
 import { BookLadder } from "@/components/BookLadder";
 import { LimitPanel } from "@/components/LimitPanel";
@@ -16,6 +17,10 @@ const EASE = [0.16, 1, 0.3, 1] as const;
 const TABS = ["Swap", "Make", "TWAP"] as const;
 type Tab = (typeof TABS)[number];
 
+/**
+ * Terminal-first layout. The product is the hero: the exchange sits top-left
+ * where the eye lands, the pitch stands beside it, the book completes the row.
+ */
 export default function Page() {
   const { data: pool } = usePool();
   const [tab, setTab] = useState<Tab>("Swap");
@@ -24,32 +29,17 @@ export default function Page() {
     <>
       <Header />
 
-      <main className="mx-auto max-w-6xl px-6 pt-20 sm:pt-28">
-        <Hero />
-
-        <Stagger gap={0.06} className="mt-16 grid grid-cols-2 gap-4 sm:grid-cols-4">
-          <Stat label="Curve price" value={pool ? pool.ammPrice.toFixed(5) : "—"} sub="EURC per USDC" live />
-          <Stat label="Pool USDC" value={pool ? fmt(pool.balance0, 2) : "—"} sub="reserve" />
-          <Stat label="Pool EURC" value={pool ? fmt(pool.balance1, 2) : "—"} sub="reserve" />
-          <Stat
-            label="LP value"
-            value={pool ? (Number(pool.virtualPrice) / 1e18).toFixed(6) : "—"}
-            sub="virtual price"
-            live
-          />
-        </Stagger>
-
-        <Stagger gap={0.08} className="mt-5 grid gap-5 lg:grid-cols-[1.05fr_0.95fr]">
+      <main className="mx-auto max-w-6xl px-6 pt-12 sm:pt-16">
+        <Stagger gap={0.08} className="grid items-start gap-6 lg:grid-cols-[1fr_0.92fr]">
+          {/* -------- terminal, top-left -------- */}
           <Rise>
-            <div className="glass lift h-full p-6">
-              {/* Tabs. The pill slides between them via a shared layoutId — the
-                  state change is a movement, not a repaint. */}
+            <div className="glass lift p-6">
               <div className="relative mb-6 grid grid-cols-3 gap-1 rounded-xl border border-white/[0.08] bg-white/[0.025] p-1">
                 {TABS.map((t) => (
                   <button
                     key={t}
                     onClick={() => setTab(t)}
-                    className="relative rounded-[9px] py-1.5 text-xs font-medium transition-colors duration-300 ease-ease"
+                    className="relative rounded-[9px] py-1.5 text-xs font-medium"
                   >
                     {tab === t && (
                       <motion.span
@@ -58,7 +48,11 @@ export default function Page() {
                         className="absolute inset-0 rounded-[9px] bg-white/[0.08]"
                       />
                     )}
-                    <span className={tab === t ? "relative text-fg" : "relative text-faint hover:text-muted"}>
+                    <span
+                      className={`relative transition-colors duration-300 ease-ease ${
+                        tab === t ? "text-fg" : "text-faint hover:text-muted"
+                      }`}
+                    >
                       {t}
                     </span>
                   </button>
@@ -81,6 +75,74 @@ export default function Page() {
             </div>
           </Rise>
 
+          {/* -------- pitch, top-right -------- */}
+          <div className="lg:pt-2">
+            <Rise>
+              <div className="inline-flex items-center gap-2.5 rounded-full border border-mint/25 bg-mint/[0.06] px-3 py-1.5">
+                <span className="pulse-dot h-1.5 w-1.5 rounded-full bg-mint" />
+                <span className="text-[10px] font-medium uppercase tracking-[0.16em] text-mint">
+                  Live on Arc Testnet
+                </span>
+              </div>
+            </Rise>
+
+            <Rise>
+              <h1 className="mt-5 text-[36px] font-semibold leading-[1.06] tracking-[-0.02em] text-fg sm:text-[46px]">
+                The order book
+                <br />
+                <span className="shimmer">Arc made possible.</span>
+              </h1>
+            </Rise>
+
+            <Rise>
+              <p className="mt-5 max-w-md text-sm leading-relaxed text-muted">
+                Every other DEX here is a curve. A real limit order book only
+                works when finality is sub-second and gas costs a cent — true on
+                exactly one chain. Orders sweep the book first, then fall
+                through to a rate-adjusted StableSwap for whatever it
+                can&apos;t absorb.
+              </p>
+            </Rise>
+
+            <Rise>
+              <div className="mt-7 flex flex-wrap items-center gap-3">
+                <Link
+                  href="/docs"
+                  className="btn btn-mint inline-flex items-center gap-1.5 bg-fg px-4 py-2 text-[13px] font-medium text-base"
+                >
+                  How it works
+                  <ArrowUpRight size={14} />
+                </Link>
+                <a
+                  href="https://github.com/amankhan321/arc-dex"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="btn inline-flex items-center gap-1.5 border border-white/[0.1] px-4 py-2 text-[13px] text-muted hover:text-fg"
+                >
+                  Read the contracts
+                  <ArrowUpRight size={14} />
+                </a>
+              </div>
+            </Rise>
+
+            <Rise>
+              <div className="mt-8 grid grid-cols-2 gap-3">
+                <Stat label="Curve price" value={pool ? pool.ammPrice.toFixed(5) : "—"} sub="EURC per USDC" live />
+                <Stat
+                  label="LP value"
+                  value={pool ? (Number(pool.virtualPrice) / 1e18).toFixed(6) : "—"}
+                  sub="virtual price"
+                  live
+                />
+                <Stat label="Pool USDC" value={pool ? fmt(pool.balance0, 2) : "—"} sub="reserve" />
+                <Stat label="Pool EURC" value={pool ? fmt(pool.balance1, 2) : "—"} sub="reserve" />
+              </div>
+            </Rise>
+          </div>
+        </Stagger>
+
+        {/* -------- the book, full width -------- */}
+        <Stagger gap={0.06} className="mt-6">
           <Rise>
             <BookLadder />
           </Rise>
@@ -102,14 +164,10 @@ function Stat({
   live?: boolean;
 }) {
   return (
-    <Rise>
-      <div className={`glass lift px-4 py-3.5 ${live ? "alive" : ""}`}>
-        <div className="text-[10px] uppercase tracking-[0.14em] text-faint">
-          {label}
-        </div>
-        <div className="mt-2 font-mono text-lg tabular text-fg">{value}</div>
-        <div className="mt-0.5 text-[10px] text-faint">{sub}</div>
-      </div>
-    </Rise>
+    <div className={`glass lift px-4 py-3 ${live ? "alive" : ""}`}>
+      <div className="text-[10px] uppercase tracking-[0.14em] text-faint">{label}</div>
+      <div className="mt-1.5 font-mono text-base tabular text-fg">{value}</div>
+      <div className="text-[10px] text-faint">{sub}</div>
+    </div>
   );
 }
