@@ -112,7 +112,11 @@ async function tendRate() {
   let next = target;
   if (next > cur + maxStep) next = cur + maxStep;
   if (next < cur - maxStep) next = cur - maxStep;
-  if (next === cur) return;
+  // THE 6H-FREEZE BUG: after converging exactly to market, next === cur and we
+  // skipped the write forever — so updatedAt never refreshed and the oracle
+  // went stale by design. On heartbeat we MUST write even an unchanged value:
+  // a same-value setRate passes the deviation check and refreshes the clock.
+  if (next === cur && !aging) return;
 
   console.log(
     `rate: ${curF.toFixed(6)} -> ${(Number(next) / 1e18).toFixed(6)} ` +
