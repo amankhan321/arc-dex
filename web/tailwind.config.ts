@@ -16,6 +16,7 @@ export default {
         rose: "#FF5C6C",
       },
       fontFamily: {
+        display: ["'Instrument Serif'", "Georgia", "serif"],
         sans: ["'Fira Sans'", "system-ui", "sans-serif"],
         mono: ["'Fira Code'", "ui-monospace", "monospace"],
       },

@@ -91,10 +91,10 @@ export default function Page() {
             </Rise>
 
             <Rise>
-              <h1 className="mt-5 text-[36px] font-semibold leading-[1.06] tracking-[-0.02em] text-fg sm:text-[46px]">
+              <h1 className="mt-5 font-display text-[46px] font-normal leading-[1.02] tracking-[-0.01em] text-white sm:text-[62px]">
                 The order book
                 <br />
-                <span className="shimmer">Arc made possible.</span>
+                <span className="shimmer italic">Arc made possible.</span>
               </h1>
             </Rise>
 

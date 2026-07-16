@@ -11,13 +11,14 @@
   /* Warmer near-black with a faint blue-violet cast, and cards a real step
      lighter so they read as lifted rather than same-grey-on-grey. The flat
      look came from base and cards being nearly identical — this separates them. */
-  --base: #0b0b12;
-  --raise: #14141f;
-  --sink: #08080e;
+  /* True deep near-black. Everything above pops against it. */
+  --base: #08080d;
+  --raise: #12121b;
+  --sink: #050509;
 
-  --fg: #edeef2;
-  --muted: #8a8f98;
-  --faint: #6a7080;
+  --fg: #f6f6fa;
+  --muted: #a2a8b4;
+  --faint: #767c8c;
 
   --indigo: #5e6ad2;
   --mint: #2ed3a7;
@@ -29,8 +30,9 @@
   /* The two shadows that make glass work. The inset top-edge highlight is the
      specular; the drop shadow is what lifts the pane off the page. Without both
      you have a translucent rectangle, not glass. */
-  --glass-shadow: 0 4px 24px rgba(0, 0, 0, 0.35),
-    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.5),
+    0 2px 8px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
   --glass-shadow-hot: 0 16px 40px rgba(46, 211, 167, 0.12),
     0 4px 24px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1);
 
@@ -60,8 +62,13 @@ body::before {
   inset: 0;
   z-index: -3;
   background:
-    radial-gradient(120% 80% at 50% -15%, #191634 0%, transparent 50%),
-    radial-gradient(90% 60% at 85% 10%, #0f1a1f 0%, transparent 55%),
+    /* main spotlight from top-centre: teal core bleeding into violet */
+    radial-gradient(70% 55% at 50% -8%, rgba(46, 211, 167, 0.16) 0%, transparent 45%),
+    radial-gradient(90% 70% at 50% -12%, rgba(94, 106, 210, 0.20) 0%, transparent 55%),
+    /* violet depth glow, opposite corner */
+    radial-gradient(50% 45% at 88% 8%, rgba(124, 108, 255, 0.14) 0%, transparent 60%),
+    /* faint teal floor glow so the bottom isn't dead */
+    radial-gradient(60% 40% at 15% 100%, rgba(46, 211, 167, 0.06) 0%, transparent 55%),
     var(--base);
   pointer-events: none;
 }
@@ -71,15 +78,17 @@ body::before {
 .glass {
   position: relative;
   border-radius: var(--r-panel);
-  border: 1px solid rgba(255, 255, 255, 0.11);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  /* Lit from above: brighter at the top edge, sinking to near-transparent at
+     the bottom, so the card reads as catching the spotlight. */
   background: linear-gradient(
-    160deg,
-    rgba(124, 132, 255, 0.06),
-    rgba(255, 255, 255, 0.02) 40%,
-    rgba(255, 255, 255, 0.015)
+    180deg,
+    rgba(255, 255, 255, 0.07) 0%,
+    rgba(255, 255, 255, 0.025) 22%,
+    rgba(255, 255, 255, 0.012) 100%
   );
-  backdrop-filter: blur(20px) saturate(140%);
-  -webkit-backdrop-filter: blur(20px) saturate(140%);
+  backdrop-filter: blur(22px) saturate(150%);
+  -webkit-backdrop-filter: blur(22px) saturate(150%);
   box-shadow: var(--glass-shadow);
 }
 
@@ -133,10 +142,10 @@ body::before {
 .shimmer {
   background: linear-gradient(
     100deg,
-    var(--indigo) 0%,
-    var(--mint) 38%,
-    #9aa4ff 62%,
-    var(--indigo) 100%
+    var(--mint) 0%,
+    #7c86ff 40%,
+    #b8a5ff 60%,
+    var(--mint) 100%
   );
   background-size: 220% 100%;
   -webkit-background-clip: text;
