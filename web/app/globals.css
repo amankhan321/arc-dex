@@ -267,3 +267,43 @@ body::before {
 /* Hide the horizontal scrollbar on the ticker rail without disabling scroll. */
 .scrollbar-none { -ms-overflow-style: none; scrollbar-width: none; }
 .scrollbar-none::-webkit-scrollbar { display: none; }
+
+
+/* Slide-fill CTA: an accent layer sweeps in left-to-right behind the label on
+   hover, an arrow slides in, the button lifts 2px with a soft accent glow.
+   Pill shape, tactile 0.97 press. */
+.cta {
+  position: relative;
+  overflow: hidden;
+  border-radius: 9999px;
+  isolation: isolate;
+  transition: transform 0.3s var(--ease), box-shadow 0.3s var(--ease);
+}
+.cta::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(90deg, var(--indigo), #7c86ff);
+  transform: translateX(-101%);
+  transition: transform 0.3s var(--ease);
+}
+.cta:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 0 0 1px rgba(94, 106, 210, 0.5), 0 10px 32px -8px rgba(94, 106, 210, 0.6);
+}
+.cta:hover:not(:disabled)::before { transform: translateX(0); }
+.cta:active:not(:disabled) { transform: scale(0.97); }
+
+.cta .cta-arrow {
+  display: inline-block;
+  width: 0;
+  opacity: 0;
+  transform: translateX(-6px);
+  transition: all 0.3s var(--ease);
+}
+.cta:hover .cta-arrow {
+  width: 1em;
+  opacity: 1;
+  transform: translateX(0);
+}

@@ -48,7 +48,7 @@ export function Stagger({
 export function Rise({
   children,
   className,
-  y = 32,
+  y = 44,
   solo = false,
 }: {
   children: ReactNode;

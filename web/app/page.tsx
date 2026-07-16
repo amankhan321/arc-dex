@@ -109,6 +109,7 @@ export default function Page() {
             </Rise>
 
             <Rise>
+              <Float distance={5} duration={7}>
               <div className="mt-7 flex flex-wrap items-center gap-3">
                 <Link
                   href="/docs"
@@ -127,6 +128,7 @@ export default function Page() {
                   <ArrowUpRight size={14} />
                 </a>
               </div>
+              </Float>
             </Rise>
 
             <Rise>

@@ -79,9 +79,9 @@ export function Header() {
                   alert("Your wallet extensions are conflicting over window.ethereum. Disable all but one and reload.");
                 }
               }}
-              className="btn bg-indigo px-3.5 py-1.5 text-xs font-medium text-white hover:bg-indigo/90"
+              className="cta bg-indigo/80 px-4 py-1.5 text-xs font-medium text-white"
             >
-              Connect
+              Connect<span className="cta-arrow">→</span>
             </button>
           )}
         </div>

@@ -111,7 +111,7 @@ export function LimitPanel() {
       <button
         onClick={place}
         disabled={!address || isPending}
-        className="btn btn-mint mt-4 w-full bg-fg py-2.5 text-sm font-medium text-base disabled:opacity-25"
+        className="cta mt-4 w-full bg-indigo/80 py-2.5 text-sm font-medium text-white disabled:opacity-25"
       >
         {!address ? "Connect wallet" : "Place limit order"}
       </button>

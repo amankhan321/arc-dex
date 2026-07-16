@@ -145,7 +145,7 @@ export function Swap() {
       <button
         onClick={onSwap}
         disabled={!address || !quote || isPending}
-        className="btn mt-5 w-full bg-indigo py-3 text-sm font-medium text-white hover:bg-indigo/90 disabled:opacity-25"
+        className="cta mt-5 w-full bg-indigo/80 py-3 text-sm font-medium text-white disabled:opacity-25"
       >
         {!address ? "Connect wallet" : isPending ? "Confirm in wallet…" : "Swap"}
       </button>
