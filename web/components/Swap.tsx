@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { ArrowDown, ChevronDown } from "lucide-react";
 import { useAccount, usePublicClient, useWriteContract } from "wagmi";
 import { ADDR, arcTestnet, erc20Abi, fmt, parse, poolAbi, quoterAbi, routerAbi } from "@/lib/contracts";
+import { useBalance, useReadContract } from "wagmi";
 import { RouteSplit, type Quote } from "./RouteSplit";
 import { SwapModal, type SwapStage } from "./SwapModal";
 
@@ -29,7 +30,7 @@ export function Swap() {
     <div className="relative">
       <button
         onClick={() => setOpenSel(openSel === side ? null : side)}
-        className="flex items-center gap-1.5 rounded-full border border-white/10 bg-[#232c40] px-2.5 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-[#2a3550]"
+        className="flex items-center gap-1.5 rounded-full border border-[color:var(--line)] bg-[color:var(--raise)] px-2.5 py-1.5 text-xs font-semibold text-fg transition-colors hover:brightness-110"
       >
         <span className={`flex h-4 w-4 items-center justify-center rounded-full text-[9px] font-bold text-white ${sym === "USDC" ? "bg-[#2775CA]" : "bg-[#3550c8]"}`}>
           {sym === "USDC" ? "$" : "€"}
@@ -38,7 +39,7 @@ export function Swap() {
         <ChevronDown size={12} className="text-muted" />
       </button>
       {openSel === side && (
-        <div className="absolute right-0 z-30 mt-1 w-28 overflow-hidden rounded-xl border border-white/10 bg-[#1c2333] shadow-xl">
+        <div className="absolute right-0 z-30 mt-1 w-28 overflow-hidden rounded-xl border border-[color:var(--line)] bg-[color:var(--raise)] shadow-xl">
           {["USDC", "EURC"].map((s) => (
             <button
               key={s}
@@ -46,7 +47,7 @@ export function Swap() {
                 if (s !== sym) setZeroForOne((v) => !v);
                 setOpenSel(null);
               }}
-              className={`flex w-full items-center gap-2 px-3 py-2 text-xs ${s === sym ? "text-white" : "text-muted hover:bg-white/5 hover:text-white"}`}
+              className={`flex w-full items-center gap-2 px-3 py-2 text-xs ${s === sym ? "text-fg" : "text-muted hover:bg-black/5 hover:text-fg"}`}
             >
               <span className={`flex h-4 w-4 items-center justify-center rounded-full text-[9px] font-bold text-white ${s === "USDC" ? "bg-[#2775CA]" : "bg-[#3550c8]"}`}>
                 {s === "USDC" ? "$" : "€"}
@@ -59,6 +60,26 @@ export function Swap() {
     </div>
   );
   const amountIn = parse(amount);
+
+  // Balance of the token being SOLD, to gate the swap button.
+  const { data: nativeBal } = useBalance({ address, chainId: arcTestnet.id, query: { enabled: !!address } });
+  const { data: eurcBal } = useReadContract({
+    address: ADDR.eurc as `0x${string}`,
+    abi: erc20Abi,
+    functionName: "balanceOf",
+    args: address ? [address] : undefined,
+    chainId: arcTestnet.id,
+    query: { enabled: !!address },
+  });
+  // zeroForOne = selling USDC (native gas token, 18-dec balance but 6-dec in our math);
+  // otherwise selling EURC (ERC20, 6-dec). Compare in the token's own base units.
+  const payBalance: bigint | undefined = zeroForOne
+    ? nativeBal
+      ? nativeBal.value / 10n ** 12n // 18dec native -> 6dec compare
+      : undefined
+    : (eurcBal as bigint | undefined);
+  const insufficient =
+    address != null && payBalance != null && amountIn > 0n && amountIn > payBalance;
 
   // Quoting is a view call. It costs nothing, so we do it on every keystroke.
   useEffect(() => {
@@ -188,10 +209,20 @@ export function Swap() {
 
       <button
         onClick={onSwap}
-        disabled={!address || !quote || isPending}
-        className="cta mt-5 w-full bg-indigo/80 py-3 text-sm font-medium text-white disabled:opacity-25"
+        disabled={!address || !quote || isPending || insufficient}
+        className={`mt-5 w-full rounded-full py-3 text-sm font-medium transition-all ${
+          insufficient
+            ? "cursor-not-allowed bg-black/10 text-faint dark:bg-white/10"
+            : "cta bg-indigo/80 text-white disabled:opacity-25"
+        }`}
       >
-        {!address ? "Connect wallet" : isPending ? "Confirm in wallet…" : "Swap"}
+        {!address
+          ? "Connect wallet"
+          : insufficient
+            ? `Insufficient ${inSym} balance`
+            : isPending
+              ? "Confirm in wallet…"
+              : "Swap"}
       </button>
 
       <SwapModal

@@ -315,24 +315,26 @@ body::before {
 
 /* ---- light theme ---- */
 [data-theme="light"] {
-  --base: #f4f5f8;
+  --base: #f3f4fd;          /* soft lavender-white, like the reference */
   --raise: #ffffff;
-  --sink: #eceef3;
-  --fg: #14151a;
-  --muted: #5a606c;
-  --faint: #8a909c;
-  --line: rgba(0, 0, 0, 0.09);
-  --line-hot: rgba(46, 160, 130, 0.4);
-  --glass-shadow: 0 8px 32px rgba(20, 22, 40, 0.1),
-    0 2px 8px rgba(20, 22, 40, 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.7);
+  --sink: #e9ebf7;
+  --fg: #10121a;            /* near-black text — crisp, readable */
+  --muted: #565b6b;         /* readable secondary, NOT the dim grey from before */
+  --faint: #8a8fa3;
+  --line: rgba(20, 22, 45, 0.1);
+  --line-hot: rgba(94, 106, 210, 0.4);
+  --glass-shadow: 0 8px 32px rgba(30, 32, 70, 0.08),
+    0 2px 8px rgba(30, 32, 70, 0.04), inset 0 1px 0 rgba(255, 255, 255, 0.9);
 }
 [data-theme="light"] html { background: var(--base); }
 [data-theme="light"] .glass {
-  background: linear-gradient(180deg, #ffffff 0%, #f7f8fb 100%);
-  border-color: rgba(0, 0, 0, 0.08);
+  background: linear-gradient(180deg, #ffffff 0%, #fbfbff 100%);
+  border-color: rgba(20, 22, 45, 0.08);
 }
-[data-theme="light"] .inner { background: #f7f8fb; border-color: rgba(0,0,0,0.08); }
-[data-theme="light"] .inner:hover { background: #eef0f5; }
+[data-theme="light"] .inner { background: #f6f7fe; border-color: rgba(20,22,45,0.08); }
+[data-theme="light"] .inner:hover { background: #eef0fc; }
+/* Shimmer heading stays vivid on white */
+[data-theme="light"] .shimmer { filter: saturate(1.1); }
 [data-theme="light"] body::before {
   background:
     radial-gradient(70% 50% at 50% -10%, rgba(94,106,210,0.10) 0%, transparent 45%),

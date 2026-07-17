@@ -9,7 +9,8 @@ export function ThemeToggle() {
 
   useEffect(() => {
     const saved = localStorage.getItem("arcbook-theme");
-    const isLight = saved === "light";
+    // Default to LIGHT unless the user explicitly chose dark.
+    const isLight = saved !== "dark";
     setLight(isLight);
     document.documentElement.setAttribute("data-theme", isLight ? "light" : "dark");
   }, []);
