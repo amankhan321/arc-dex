@@ -78,7 +78,7 @@ export function LimitPanel() {
         makers make, takers take, and the paths never interleave.
       </p>
 
-      <div className="relative mt-4 grid grid-cols-2 gap-1 rounded-xl border border-white/[0.08] bg-white/[0.025] p-1">
+      <div className="relative mt-4 grid grid-cols-2 gap-1 rounded-xl border border-[color:var(--line)] bg-white/[0.025] p-1">
         {([true, false] as const).map((b) => (
           <button
             key={String(b)}
@@ -119,7 +119,7 @@ export function LimitPanel() {
       <button
         onClick={claim}
         disabled={!address}
-        className="btn mt-2 w-full border border-white/[0.08] py-2.5 text-xs text-muted hover:text-fg disabled:opacity-25"
+        className="btn mt-2 w-full border border-[color:var(--line)] py-2.5 text-xs text-muted hover:text-fg disabled:opacity-25"
       >
         Claim fills
       </button>

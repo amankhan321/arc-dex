@@ -91,7 +91,7 @@ export default function Page() {
             </Rise>
 
             <Rise>
-              <h1 className="mt-5 font-display text-[46px] font-normal leading-[1.02] tracking-[-0.01em] text-white sm:text-[62px]">
+              <h1 className="mt-5 font-display text-[46px] font-normal leading-[1.02] tracking-[-0.01em] text-fg sm:text-[62px]">
                 The order book
                 <br />
                 <span className="shimmer italic">Arc made possible.</span>

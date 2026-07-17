@@ -37,7 +37,7 @@ export function BookLadder({ onMake }: { onMake?: () => void } = {}) {
         {asks.length === 0 && <Empty>no asks resting</Empty>}
       </div>
 
-      <div className="my-3 flex items-center justify-between rounded-[12px] border border-white/[0.08] bg-white/[0.025] px-3 py-2">
+      <div className="my-3 flex items-center justify-between rounded-[12px] border border-[color:var(--line)] bg-white/[0.025] px-3 py-2">
         <span className="font-mono text-[11px] text-faint">
           {spread !== null ? `spread ${(spread * 1e4).toFixed(1)} bps` : "one-sided"}
         </span>

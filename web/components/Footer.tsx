@@ -5,7 +5,7 @@ const EXPLORER = "https://testnet.arcscan.app/address";
 
 export function Footer() {
   return (
-    <footer className="mt-24 border-t border-white/[0.06] px-6 py-10">
+    <footer className="mt-24 border-t border-[color:var(--line)] px-6 py-10">
       <div className="mx-auto flex max-w-6xl flex-col gap-8 sm:flex-row sm:items-start sm:justify-between">
         <div className="max-w-xs">
           <div className="flex items-center gap-2.5">

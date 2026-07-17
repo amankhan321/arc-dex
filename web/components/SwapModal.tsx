@@ -71,7 +71,7 @@ export function SwapModal({
             </div>
 
             {/* from -> to summary */}
-            <div className="mt-5 flex items-center justify-between rounded-xl border border-white/[0.08] bg-white/[0.02] p-3">
+            <div className="mt-5 flex items-center justify-between rounded-xl border border-[color:var(--line)] bg-white/[0.02] p-3">
               <Side sym={fromSym} amt={amountIn} />
               <div className="mx-2 text-faint">→</div>
               <Side sym={toSym} amt={amountOut} align="right" />
@@ -94,7 +94,7 @@ export function SwapModal({
                               ? "border-rose bg-rose/15 text-rose"
                               : active
                                 ? "border-indigo bg-indigo/15 text-indigo"
-                                : "border-white/15 text-faint"
+                                : "border-[color:var(--line)]5 text-faint"
                         }`}
                       >
                         {done ? (

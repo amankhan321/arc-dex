@@ -182,7 +182,7 @@ export function Swap() {
         <button
           onClick={() => setZeroForOne((v) => !v)}
           aria-label="Flip direction"
-          className="btn absolute left-1/2 top-[-15px] z-10 -translate-x-1/2 border border-white/[0.1] bg-raise p-2"
+          className="btn absolute left-1/2 top-[-15px] z-10 -translate-x-1/2 border border-[color:var(--line)] bg-raise p-2"
         >
           <ArrowDown size={14} className="text-muted" />
         </button>

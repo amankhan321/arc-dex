@@ -46,7 +46,7 @@ export function Hero() {
             href="https://github.com/amankhan321/arc-dex"
             target="_blank"
             rel="noreferrer"
-            className="btn inline-flex items-center gap-1.5 border border-white/[0.1] px-5 py-2.5 text-[13px] text-muted hover:text-fg"
+            className="btn inline-flex items-center gap-1.5 border border-[color:var(--line)] px-5 py-2.5 text-[13px] text-muted hover:text-fg"
           >
             Read the contracts
             <ArrowUpRight size={14} />

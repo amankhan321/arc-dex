@@ -69,7 +69,7 @@ export function TwapPanel() {
         overreach.
       </p>
 
-      <div className="mt-4 grid grid-cols-2 gap-1 rounded-xl border border-white/[0.08] bg-white/[0.025] p-1">
+      <div className="mt-4 grid grid-cols-2 gap-1 rounded-xl border border-[color:var(--line)] bg-white/[0.025] p-1">
         {([true, false] as const).map((z) => (
           <button
             key={String(z)}

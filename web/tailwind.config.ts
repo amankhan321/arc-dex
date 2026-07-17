@@ -5,12 +5,12 @@ export default {
   theme: {
     extend: {
       colors: {
-        base: "#0A0B0F",
-        raise: "#0E1015",
-        sink: "#07080B",
-        fg: "#EDEEF2",
-        muted: "#8A8F98",
-        faint: "#6A7080",
+        base: "var(--base)",
+        raise: "var(--raise)",
+        sink: "var(--sink)",
+        fg: "var(--fg)",
+        muted: "var(--muted)",
+        faint: "var(--faint)",
         indigo: "#5E6AD2",
         mint: "#2ED3A7",
         rose: "#FF5C6C",

@@ -16,7 +16,7 @@ export function Header() {
   const { data: bal } = useBalance({ address, chainId: arcTestnet.id, query: { enabled: !!address } });
 
   return (
-    <header className="sticky top-0 z-30 border-b border-white/[0.06] bg-base/70 backdrop-blur-xl">
+    <header className="sticky top-0 z-30 border-b border-[color:var(--line)] bg-base backdrop-blur-xl">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-3.5">
         <Link href="/" className="group flex items-center gap-2.5">
           <motion.div
@@ -27,7 +27,7 @@ export function Header() {
           <span className="text-sm font-medium tracking-tight text-fg">
             ArcBook
           </span>
-          <span className="hidden rounded-full border border-white/10 px-2 py-0.5 text-[10px] text-muted sm:block">
+          <span className="hidden rounded-full border border-[color:var(--line)] px-2 py-0.5 text-[10px] text-muted sm:block">
             Arc Testnet
           </span>
         </Link>
@@ -65,14 +65,14 @@ export function Header() {
               before our code runs. Guard the connect click so the failure is a
               readable message, not a silent console error. */}
           {address && bal && (
-            <span className="hidden rounded-lg border border-white/10 px-2.5 py-1.5 font-mono text-[11px] tabular text-fg sm:inline">
+            <span className="hidden rounded-lg border border-[color:var(--line)] px-2.5 py-1.5 font-mono text-[11px] tabular text-fg sm:inline">
               {Number(bal.formatted).toLocaleString("en-US", { maximumFractionDigits: 2 })} {bal.symbol}
             </span>
           )}
           {address ? (
             <button
               onClick={() => disconnect()}
-              className="btn border border-white/[0.1] px-3 py-1.5 font-mono text-xs tabular text-muted hover:text-fg"
+              className="btn border border-[color:var(--line)] px-3 py-1.5 font-mono text-xs tabular text-muted hover:text-fg"
             >
               {address.slice(0, 6)}…{address.slice(-4)}
             </button>
