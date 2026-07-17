@@ -100,7 +100,7 @@ function Leg({
   const dot = tone === "mint" ? "bg-mint" : "bg-indigo";
   return (
     <motion.div
-      animate={{ opacity: share < 0.5 ? 0.35 : 1 }}
+      animate={{ opacity: share < 0.5 ? 0.6 : 1 }}
       transition={{ duration: 0.4, ease: EASE }}
       className="rounded-[12px] border border-white/[0.07] bg-white/[0.02] p-3"
     >

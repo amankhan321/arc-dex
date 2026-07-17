@@ -31,7 +31,7 @@ export function Ticker() {
             </span>
           </div>
         )}
-        {ticks.map((t) => {
+        {ticks.filter((t) => t.price > 0).map((t) => {
           const up = t.price >= t.prev;
           const isCrypto = t.pair === "BTC/USD" || t.pair === "ETH/USD";
           const shown = isCrypto

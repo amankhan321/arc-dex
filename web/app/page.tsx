@@ -32,7 +32,7 @@ export default function Page() {
       <Header />
 
       <main className="mx-auto max-w-6xl px-6 pt-12 sm:pt-16">
-        <Stagger gap={0.08} whenInView={false} className="grid items-start gap-6 lg:grid-cols-[1fr_0.92fr]">
+        <Stagger gap={0.08} whenInView={false} className="mx-auto flex max-w-xl flex-col gap-10">
           {/* -------- terminal, top-left -------- */}
           <Rise>
             <div className="glass lift p-6">
@@ -78,7 +78,7 @@ export default function Page() {
           </Rise>
 
           {/* -------- pitch, top-right -------- */}
-          <div className="lg:pt-2">
+          <div className="text-center">
             <Rise>
               <Float distance={4} duration={5}>
                 <div className="inline-flex items-center gap-2.5 rounded-full border border-mint/25 bg-mint/[0.06] px-3 py-1.5">
@@ -91,7 +91,7 @@ export default function Page() {
             </Rise>
 
             <Rise>
-              <h1 className="mt-5 font-display text-[46px] font-normal leading-[1.02] tracking-[-0.01em] text-fg sm:text-[62px]">
+              <h1 className="mx-auto mt-5 font-display text-[46px] font-normal leading-[1.02] tracking-[-0.01em] text-fg sm:text-[62px]">
                 The order book
                 <br />
                 <span className="shimmer italic">Arc made possible.</span>
@@ -99,7 +99,7 @@ export default function Page() {
             </Rise>
 
             <Rise>
-              <p className="mt-5 max-w-md text-sm leading-relaxed text-muted">
+              <p className="mx-auto mt-5 max-w-md text-sm leading-relaxed text-muted">
                 Every other DEX here is a curve. A real limit order book only
                 works when finality is sub-second and gas costs a cent — true on
                 exactly one chain. Orders sweep the book first, then fall
@@ -110,7 +110,7 @@ export default function Page() {
 
             <Rise>
               <Float distance={5} duration={7}>
-              <div className="mt-7 flex flex-wrap items-center gap-3">
+              <div className="mt-7 flex flex-wrap items-center justify-center gap-3">
                 <Link
                   href="/docs"
                   className="btn btn-mint inline-flex items-center gap-1.5 bg-fg px-4 py-2 text-[13px] font-medium text-base"
@@ -146,7 +146,7 @@ export default function Page() {
                     RPC error: {poolError.message.slice(0, 220)}
                   </p>
                 ))}
-              <div className="mt-8 grid grid-cols-2 gap-3">
+              <div className="mx-auto mt-8 grid max-w-md grid-cols-2 gap-3 text-left">
                 <StatNum label="Curve price" value={pool?.ammPrice} format={(n) => n.toFixed(5)} sub="EURC per USDC" live />
                 <StatNum
                   label="LP value"

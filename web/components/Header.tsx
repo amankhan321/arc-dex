@@ -32,11 +32,6 @@ export function Header() {
           </span>
         </Link>
 
-        <nav className="hidden items-center gap-6 md:flex">
-          <NavLink href="/docs">How it works</NavLink>
-          <NavLink href="https://github.com/amankhan321/arc-dex">GitHub</NavLink>
-        </nav>
-
         <div className="flex items-center gap-3">
           <ThemeToggle />
           {/* One glance = full diagnosis. Green: reads flowing. Amber: loading.
