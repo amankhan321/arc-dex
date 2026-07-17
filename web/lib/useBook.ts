@@ -75,12 +75,18 @@ export function usePool(refetchMs = 5000) {
           args: args as never,
         });
 
-      const [b0, b1, vp, mid] = await Promise.all([
-        call("balance0") as Promise<bigint>,
-        call("balance1") as Promise<bigint>,
-        call("getVirtualPrice") as Promise<bigint>,
-        call("getDy", [true, 1_000_000n]) as Promise<bigint>,
-      ]);
+      // ONE round-trip for all four via Multicall3, instead of four serial
+      // eth_calls through the proxy. This is what was taking 10-15s.
+      const c = { address: ADDR.pool as `0x${string}`, abi: poolAbi } as const;
+      const [b0, b1, vp, mid] = await client.multicall({
+        allowFailure: false,
+        contracts: [
+          { ...c, functionName: "balance0" },
+          { ...c, functionName: "balance1" },
+          { ...c, functionName: "getVirtualPrice" },
+          { ...c, functionName: "getDy", args: [true, 1_000_000n] },
+        ],
+      }) as [bigint, bigint, bigint, bigint];
 
       return {
         balance0: b0,
@@ -91,5 +97,7 @@ export function usePool(refetchMs = 5000) {
     },
     retry: 3,
     retryDelay: (n) => Math.min(1000 * 2 ** n, 5000),
+    placeholderData: (prev) => prev,
+    staleTime: 2000,
   });
 }

@@ -8,6 +8,12 @@ export const arcTestnet = defineChain({
   blockExplorers: {
     default: { name: "ArcScan", url: "https://testnet.arcscan.app" },
   },
+  // Standard Multicall3 (same address on every chain). Lets viem fold the four
+  // pool reads into ONE eth_call instead of four serial round-trips through the
+  // proxy — the cause of the 10-15s stat-card lag.
+  contracts: {
+    multicall3: { address: "0xcA11bde05977b3631167028862bE2a173976CA11" },
+  },
   testnet: true,
 });
 
