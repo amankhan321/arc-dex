@@ -10,6 +10,7 @@ import { BookLadder } from "@/components/BookLadder";
 import { LimitPanel } from "@/components/LimitPanel";
 import { TwapPanel } from "@/components/TwapPanel";
 import { Rise, Stagger } from "@/components/Reveal";
+import { PanelBoundary } from "@/components/PanelBoundary";
 import { CountUp } from "@/components/CountUp";
 import { Float } from "@/components/Reveal";
 import { usePool } from "@/lib/useBook";
