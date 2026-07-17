@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { AnimatePresence, motion } from "framer-motion";
+import { motion } from "framer-motion";
 import { ArrowUpRight } from "lucide-react";
 import { Header } from "@/components/Header";
 import { Swap } from "@/components/Swap";
@@ -67,19 +67,20 @@ export default function Page() {
                 ))}
               </div>
 
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={tab}
-                  initial={{ opacity: 0, y: 8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -6 }}
-                  transition={{ duration: 0.28, ease: EASE }}
-                >
-                  {tab === "Swap" && <Swap />}
-                  {tab === "Make" && <LimitPanel />}
-                  {tab === "TWAP" && <TwapPanel />}
-                </motion.div>
-              </AnimatePresence>
+              {/* No AnimatePresence here, deliberately: mode="wait" can strand
+                  the incoming tab unmounted if a re-render lands mid-exit — and
+                  this page re-renders every few seconds from the book poll. A
+                  keyed fade-in gives the same feel with no wedge state. */}
+              <motion.div
+                key={tab}
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.25, ease: EASE }}
+              >
+                {tab === "Swap" && <Swap />}
+                {tab === "Make" && <LimitPanel />}
+                {tab === "TWAP" && <TwapPanel />}
+              </motion.div>
             </motion.div>
           </Rise>
 
