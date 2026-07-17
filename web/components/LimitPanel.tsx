@@ -2,12 +2,14 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { useAccount, useWriteContract } from "wagmi";
+import { useAccount, useBalance, useWriteContract } from "wagmi";
 import { ADDR, arcTestnet, bookAbi, erc20Abi, parse, tickOf } from "@/lib/contracts";
 
 export function LimitPanel() {
   const { address } = useAccount();
   const { writeContractAsync, isPending } = useWriteContract();
+  const { data: gasBal } = useBalance({ address, chainId: arcTestnet.id, query: { enabled: !!address } });
+  const noGas = !!address && gasBal != null && gasBal.value === 0n;
 
   const [isBid, setIsBid] = useState(true);
   const [price, setPrice] = useState("0.9300");
@@ -110,10 +112,10 @@ export function LimitPanel() {
 
       <button
         onClick={place}
-        disabled={!address || isPending}
+        disabled={!address || isPending || noGas}
         className="cta mt-4 w-full bg-indigo/80 py-2.5 text-sm font-medium text-white disabled:opacity-25"
       >
-        {!address ? "Connect wallet" : "Place limit order"}
+        {!address ? "Connect wallet" : noGas ? "Need USDC for gas (faucet)" : "Place limit order"}
       </button>
 
       <button

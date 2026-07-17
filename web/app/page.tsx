@@ -35,7 +35,13 @@ export default function Page() {
         <Stagger gap={0.08} whenInView={false} className="mx-auto flex max-w-xl flex-col gap-10">
           {/* -------- terminal, top-left -------- */}
           <Rise>
-            <div id="terminal" className="glass lift scroll-mt-24 p-6">
+            <motion.div
+              id="terminal"
+              initial={{ opacity: 0, scale: 0.9, y: 24 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
+              className="glass lift scroll-mt-24 p-6"
+            >
               <div className="relative mb-6 grid grid-cols-3 gap-1 rounded-xl border border-white/[0.08] bg-white/[0.025] p-1">
                 {TABS.map((t) => (
                   <button
@@ -74,7 +80,7 @@ export default function Page() {
                   {tab === "TWAP" && <TwapPanel />}
                 </motion.div>
               </AnimatePresence>
-            </div>
+            </motion.div>
           </Rise>
 
           {/* -------- pitch, top-right -------- */}
