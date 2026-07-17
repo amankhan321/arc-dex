@@ -13,8 +13,8 @@ export function Footer() {
             <span className="text-sm font-medium text-fg">ArcBook</span>
           </div>
           <p className="mt-3 text-xs leading-relaxed text-faint">
-            Unaudited, testnet only. No admin keys exist in any contract — no
-            owner, no pause, no upgrade, no rescue.
+            A hybrid CLOB + rate-adjusted StableSwap for stablecoin FX, live on
+            Arc Testnet.
           </p>
         </div>
 
