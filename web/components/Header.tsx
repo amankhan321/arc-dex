@@ -2,7 +2,9 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { useAccount, useConnect, useDisconnect } from "wagmi";
+import { useAccount, useBalance, useConnect, useDisconnect } from "wagmi";
+import { ThemeToggle } from "./ThemeToggle";
+import { arcTestnet } from "@/lib/contracts";
 import { usePool } from "@/lib/useBook";
 
 export function Header() {
@@ -10,6 +12,8 @@ export function Header() {
   const { connect, connectors } = useConnect();
   const { disconnect } = useDisconnect();
   const { data: pool, error: poolError, isLoading: poolLoading } = usePool();
+  // Native USDC balance (USDC is the gas token on Arc). Refreshes on new blocks.
+  const { data: bal } = useBalance({ address, chainId: arcTestnet.id, query: { enabled: !!address } });
 
   return (
     <header className="sticky top-0 z-30 border-b border-white/[0.06] bg-base/70 backdrop-blur-xl">
@@ -33,7 +37,8 @@ export function Header() {
           <NavLink href="https://github.com/amankhan321/arc-dex">GitHub</NavLink>
         </nav>
 
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3">
+          <ThemeToggle />
           {/* One glance = full diagnosis. Green: reads flowing. Amber: loading.
               Red: the RPC path is down — hover for the actual error. */}
           <span
@@ -59,6 +64,11 @@ export function Header() {
           {/* Multi-wallet extensions can clash over window.ethereum and throw
               before our code runs. Guard the connect click so the failure is a
               readable message, not a silent console error. */}
+          {address && bal && (
+            <span className="hidden rounded-lg border border-white/10 px-2.5 py-1.5 font-mono text-[11px] tabular text-fg sm:inline">
+              {Number(bal.formatted).toLocaleString("en-US", { maximumFractionDigits: 2 })} {bal.symbol}
+            </span>
+          )}
           {address ? (
             <button
               onClick={() => disconnect()}

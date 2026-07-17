@@ -5,6 +5,7 @@ import { ArrowDown, ChevronDown } from "lucide-react";
 import { useAccount, usePublicClient, useWriteContract } from "wagmi";
 import { ADDR, arcTestnet, erc20Abi, fmt, parse, poolAbi, quoterAbi, routerAbi } from "@/lib/contracts";
 import { RouteSplit, type Quote } from "./RouteSplit";
+import { SwapModal, type SwapStage } from "./SwapModal";
 
 export function Swap() {
   const { address } = useAccount();
@@ -16,6 +17,9 @@ export function Swap() {
   const [quote, setQuote] = useState<Quote | null>(null);
   const [ammOnly, setAmmOnly] = useState<bigint | null>(null);
   const [status, setStatus] = useState<string | null>(null);
+  const [stage, setStage] = useState<SwapStage>("idle");
+  const [modalOpen, setModalOpen] = useState(false);
+  const [txHash, setTxHash] = useState<string>();
 
   const inSym = zeroForOne ? "USDC" : "EURC";
   const outSym = zeroForOne ? "EURC" : "USDC";
@@ -104,8 +108,10 @@ export function Swap() {
   async function onSwap() {
     if (!address || !quote || amountIn === 0n) return;
     const token = (zeroForOne ? ADDR.usdc : ADDR.eurc) as `0x${string}`;
+    setModalOpen(true);
+    setTxHash(undefined);
     try {
-      setStatus("Approving…");
+      setStage("approving");
       await writeContractAsync({
         address: token,
         abi: erc20Abi,
@@ -117,7 +123,7 @@ export function Swap() {
       const minOut = (quote.expectedOut * 995n) / 1000n; // 0.5% floor
       const deadline = BigInt(Math.floor(Date.now() / 1000) + 600);
 
-      setStatus("Routing…");
+      setStage("swapping");
       const hash = await writeContractAsync({
         address: ADDR.router as `0x${string}`,
         abi: routerAbi,
@@ -125,9 +131,12 @@ export function Swap() {
         args: [zeroForOne, amountIn, quote.bookIn, minOut, quote.limitTick, 30, deadline, address],
         chainId: arcTestnet.id,
       });
+      setTxHash(hash);
+      setStage("done");
       setStatus(`Filled · ${hash.slice(0, 10)}…`);
     } catch (e) {
       const m = e instanceof Error ? e.message : "failed";
+      setStage("error");
       setStatus(m.split("\n")[0].slice(0, 90));
     }
   }
@@ -185,7 +194,19 @@ export function Swap() {
         {!address ? "Connect wallet" : isPending ? "Confirm in wallet…" : "Swap"}
       </button>
 
-      {status && (
+      <SwapModal
+        open={modalOpen}
+        stage={stage}
+        fromSym={inSym}
+        toSym={outSym}
+        amountIn={amountIn}
+        amountOut={quote?.expectedOut ?? 0n}
+        txHash={txHash}
+        error={status ?? undefined}
+        onClose={() => setModalOpen(false)}
+      />
+
+      {status && stage === "idle" && (
         <p className="mt-3 break-words text-center font-mono text-[11px] text-muted">
           {status}
         </p>
