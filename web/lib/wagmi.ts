@@ -3,21 +3,24 @@ import { injected } from "wagmi/connectors";
 import { arcTestnet } from "./contracts";
 
 /**
- * injected() covers every browser-extension wallet — MetaMask, OKX, Rabby,
- * Phantom — via EIP-6963, which announces each installed wallet separately so
- * they appear by name with no per-wallet code. Reads hit the Arc RPC directly;
- * writes go through whichever wallet connects.
+ * injected() covers MetaMask / OKX / Rabby / Phantom via EIP-6963.
  *
- * (Google/email login via Privy was attempted and reverted: @privy-io/wagmi
- * pins viem to exactly 2.52.0, which conflicts with the version the rest of the
- * stack builds against. Revisit post-launch as a deliberate upgrade, not a
- * last-minute add.)
+ * batch:false is REQUIRED — the Arc RPC intermittently drops batched eth_calls,
+ * which surfaces as "HTTP request failed" on the swap quote (two reads that
+ * viem would otherwise bundle). Stats survive because they use an explicit
+ * Multicall3 call; the quote path does not, so batching must be off. retry +
+ * timeout ride out transient blips.
  */
 export const wagmiConfig = createConfig({
   chains: [arcTestnet],
   connectors: [injected()],
   transports: {
-    [arcTestnet.id]: http("https://rpc.testnet.arc.network"),
+    [arcTestnet.id]: http("https://rpc.testnet.arc.network", {
+      batch: false,
+      retryCount: 3,
+      retryDelay: 400,
+      timeout: 15_000,
+    }),
   },
   ssr: true,
 });
