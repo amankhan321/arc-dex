@@ -14,7 +14,7 @@ const MAX_LEVELS = 12;
  * bitmap via nextBidBelow / nextAskAbove. No indexer, no subgraph, no backend.
  * The book IS the contract.
  */
-export function useBook(refetchMs = 3000) {
+export function useBook(refetchMs = 2000) {
   // Pinned to Arc explicitly. Without this, usePublicClient() follows the
   // WALLET's chain — and if the wallet sits on mainnet (or anything not in our
   // config) it returns undefined and every read on the page silently dies.
@@ -23,6 +23,7 @@ export function useBook(refetchMs = 3000) {
   return useQuery<Book>({
     queryKey: ["book"],
     refetchInterval: refetchMs,
+    refetchOnWindowFocus: true,
     enabled: !!client,
     retry: 3,
     retryDelay: (n) => Math.min(1000 * 2 ** n, 5000),
@@ -49,16 +50,19 @@ export function useBook(refetchMs = 3000) {
         }
         if (ticks.length === 0) return [];
 
-        const depths = (await client.multicall({
-          allowFailure: false,
+        const depths = await client.multicall({
+          allowFailure: true,
           contracts: ticks.map((t) => ({
             address: book, abi: bookAbi, functionName: "levelDepth", args: [isBid, t],
           })),
-        })) as bigint[];
+        });
 
         const out: Level[] = [];
         ticks.forEach((t, i) => {
-          if (depths[i] > 0n) out.push({ tick: t, price: priceOf(t), size: depths[i] });
+          const r = depths[i];
+          if (r.status === "success" && (r.result as bigint) > 0n) {
+            out.push({ tick: t, price: priceOf(t), size: r.result as bigint });
+          }
         });
         return out;
       };

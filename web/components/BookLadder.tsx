@@ -1,6 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
+import { useEffect, useRef, useState } from "react";
 import { fmt } from "@/lib/contracts";
 import { useBook, usePool, type Level } from "@/lib/useBook";
 
@@ -74,6 +75,18 @@ export function BookLadder({ onMake }: { onMake?: () => void } = {}) {
 
 function Row({ level, side, max }: { level: Level; side: "bid" | "ask"; max: number }) {
   const pct = (Number(level.size) / max) * 100;
+
+  // Flash when this level's size changes — the "alive, ticking market" feel.
+  const prev = useRef(level.size);
+  const [flash, setFlash] = useState<"up" | "down" | null>(null);
+  useEffect(() => {
+    if (level.size !== prev.current) {
+      setFlash(level.size > prev.current ? "up" : "down");
+      prev.current = level.size;
+      const id = setTimeout(() => setFlash(null), 650);
+      return () => clearTimeout(id);
+    }
+  }, [level.size]);
   const tone = side === "bid" ? "text-mint" : "text-rose";
   const depth = side === "bid" ? "bg-mint/[0.09]" : "bg-rose/[0.09]";
 
@@ -84,7 +97,7 @@ function Row({ level, side, max }: { level: Level; side: "bid" | "ask"; max: num
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.22, ease: EASE }}
-      className={`row row-${side} grid cursor-default grid-cols-[1fr_auto_auto] gap-x-5 rounded-[6px] px-2 py-[6px] font-mono text-xs tabular`}
+      className={`row row-${side} grid cursor-default grid-cols-[1fr_auto_auto] gap-x-5 rounded-[6px] px-2 py-[6px] font-mono text-xs tabular ${flash === "up" ? "flash-up" : flash === "down" ? "flash-down" : ""}`}
     >
       <motion.div
         layout
