@@ -4,6 +4,7 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { useAccount, useBalance, useConnect, useDisconnect } from "wagmi";
 import { ThemeToggle } from "./ThemeToggle";
+import { ConnectMenu } from "./ConnectMenu";
 import { arcTestnet } from "@/lib/contracts";
 import { usePool } from "@/lib/useBook";
 
@@ -72,22 +73,7 @@ export function Header() {
               {address.slice(0, 6)}…{address.slice(-4)}
             </button>
           ) : (
-            <button
-              onClick={() => {
-                try {
-                  if (!connectors.length || typeof window === "undefined" || !("ethereum" in window)) {
-                    alert("No wallet detected. Install MetaMask (or another injected wallet) and reload.");
-                    return;
-                  }
-                  connect({ connector: connectors[0] });
-                } catch {
-                  alert("Your wallet extensions are conflicting over window.ethereum. Disable all but one and reload.");
-                }
-              }}
-              className="cta bg-indigo/80 px-4 py-1.5 text-xs font-medium text-white"
-            >
-              Connect<span className="cta-arrow">→</span>
-            </button>
+            <ConnectMenu />
           )}
         </div>
       </div>

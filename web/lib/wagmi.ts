@@ -1,32 +1,29 @@
-import { createConfig, fallback, http } from "wagmi";
-import { injected } from "wagmi/connectors";
+import { createConfig, http } from "wagmi";
+import { coinbaseWallet, injected } from "wagmi/connectors";
 import { arcTestnet } from "./contracts";
 
-const DIRECT = "https://rpc.testnet.arc.network";
-
 /**
- * THE EVIDENCE, so this doesn't flip-flop again: every server-side caller
- * (keeper, cast from two different machines) reaches the Arc RPC fine; every
- * BROWSER call fails ("RPC Request failed" on eth_call). The RPC blocks
- * browser-origin requests. Reads therefore go through our same-origin
- * /api/rpc proxy — served by this very app on Vercel AND on the droplet —
- * with the direct RPC as a fallback in case some environment allows it.
- * Batching stays OFF everywhere: the RPC also drops batched calls.
- * Writes go through the connected wallet and never touch this transport.
+ * Connectors:
+ *  - injected(): MetaMask, OKX, Rabby, Phantom, any EIP-1193/6963 extension.
+ *    Modern wallets announce themselves via EIP-6963, so wagmi lists each
+ *    installed one separately — OKX and Rabby appear by name automatically
+ *    when present, no per-wallet code needed.
+ *  - coinbaseWallet(): Coinbase Wallet + its Smart Wallet (passkey) option.
+ *    NOTE: Smart Wallet mints ERC-4337 accounts on Base and needs a bundler +
+ *    EntryPoint on the target chain; on Arc testnet that path may not resolve
+ *    until Arc ships 4337 infra. The connector is wired so it lights up the
+ *    moment it can; today it reliably covers the Coinbase extension.
+ *
+ * Reads go straight to the Arc RPC; writes go through whichever wallet connects.
  */
-const opts = { retryCount: 3, retryDelay: 400, timeout: 15_000, batch: false } as const;
-
-const transport =
-  typeof window === "undefined"
-    ? http(DIRECT, opts)
-    : fallback([
-        http(`${window.location.origin}/api/rpc`, opts),
-        http(DIRECT, opts),
-      ]);
-
 export const wagmiConfig = createConfig({
   chains: [arcTestnet],
-  connectors: [injected()],
-  transports: { [arcTestnet.id]: transport },
+  connectors: [
+    injected(),
+    coinbaseWallet({ appName: "ArcBook", preference: "all" }),
+  ],
+  transports: {
+    [arcTestnet.id]: http("https://rpc.testnet.arc.network"),
+  },
   ssr: true,
 });
