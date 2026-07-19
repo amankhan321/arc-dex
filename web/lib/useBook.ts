@@ -23,8 +23,6 @@ async function stridedDiscover(
   client: NonNullable<ReturnType<typeof usePublicClient>>,
   book: `0x${string}`,
 ): Promise<{ bids: number[]; asks: number[] }> {
-  if (Date.now() - discoAt < 30_000) return discoCache;
-  discoAt = Date.now(); // set first so concurrent refetches don't double-fire
   try {
     const askStarts: number[] = [];
     for (let p = 0; p <= MAX_SCAN; p += STRIDE) askStarts.push(p);
@@ -55,7 +53,7 @@ async function stridedDiscover(
   return discoCache;
 }
 
-export function useBook(refetchMs = 3000) {
+export function useBook(refetchMs = 5000) {
   // Pinned to Arc explicitly. Without this, usePublicClient() follows the
   // WALLET's chain — and if the wallet sits on mainnet (or anything not in our
   // config) it returns undefined and every read on the page silently dies.
@@ -74,29 +72,39 @@ export function useBook(refetchMs = 3000) {
       if (!client) return { bids: [], asks: [] };
       const book = ADDR.book as `0x${string}`;
 
-      // Cheap bounded walk every cycle (near-spread levels, few calls) …
+      // NO sequential reads anywhere. The old bounded walk (bestAsk ->
+      // nextAskAbove one call at a time) was the last fragile piece: one
+      // throttled read mid-chain threw the whole query and the book rendered
+      // empty ("no asks resting" while bestAsk()==150000 on-chain — Nick's
+      // cast proved it). The strided discovery finds every tick in ONE
+      // multicall, so it is now the sole source: the whole refresh is ~3
+      // atomic multicalls. Either a batch lands or the previous book stays.
+      // Guaranteed near-spread walk (2-4 cheap reads) UNIONed with the strided
+      // far-tick discovery. The walk alone can't jump gaps > 64 words; discovery
+      // alone can be throttled on a given window. Together, near-spread levels
+      // ALWAYS appear (bestAsk 150000 proven on-chain) and far ones appear when
+      // discovery lands.
       const walkTicks = async (isBid: boolean): Promise<number[]> => {
         const fnBest = isBid ? "bestBid" : "bestAsk";
         const fnNext = isBid ? "nextBidBelow" : "nextAskAbove";
         const ticks: number[] = [];
-        let tick = Number(
-          await client.readContract({ address: book, abi: bookAbi, functionName: fnBest as never, args: [] as never }),
-        );
-        while (tick !== 0 && ticks.length < MAX_LEVELS) {
-          ticks.push(tick);
-          tick = Number(
-            await client.readContract({ address: book, abi: bookAbi, functionName: fnNext as never, args: [tick] as never }),
-          );
+        try {
+          let tick = Number(await client.readContract({ address: book, abi: bookAbi, functionName: fnBest as never, args: [] as never }));
+          while (tick !== 0 && ticks.length < MAX_LEVELS) {
+            ticks.push(tick);
+            tick = Number(await client.readContract({ address: book, abi: bookAbi, functionName: fnNext as never, args: [tick] as never }));
+          }
+        } catch {
+          /* walk failed this cycle — discovery may still cover it */
         }
         return ticks;
       };
 
-      // … plus a strided far-tick DISCOVERY at most every 30s (cached), so the
-      // RPC isn't hammered every refetch. Discovery jumps the contract's
-      // 64-word scan bound; the walk covers the spread in between runs.
-      const discovered = await stridedDiscover(client, book);
-
-      const [walkedBids, walkedAsks] = await Promise.all([walkTicks(true), walkTicks(false)]);
+      const [discovered, walkedBids, walkedAsks] = await Promise.all([
+        stridedDiscover(client, book),
+        walkTicks(true),
+        walkTicks(false),
+      ]);
       const bidTicks = [...new Set([...walkedBids, ...discovered.bids])];
       const askTicks = [...new Set([...walkedAsks, ...discovered.asks])];
 
