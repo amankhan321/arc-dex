@@ -14,7 +14,48 @@ const MAX_LEVELS = 12;
  * bitmap via nextBidBelow / nextAskAbove. No indexer, no subgraph, no backend.
  * The book IS the contract.
  */
-export function useBook(refetchMs = 2000) {
+const STRIDE = 16384;
+const MAX_SCAN = 600_000;
+let discoCache: { bids: number[]; asks: number[] } = { bids: [], asks: [] };
+let discoAt = 0;
+
+async function stridedDiscover(
+  client: NonNullable<ReturnType<typeof usePublicClient>>,
+  book: `0x${string}`,
+): Promise<{ bids: number[]; asks: number[] }> {
+  if (Date.now() - discoAt < 30_000) return discoCache;
+  discoAt = Date.now(); // set first so concurrent refetches don't double-fire
+  try {
+    const askStarts: number[] = [];
+    for (let p = 0; p <= MAX_SCAN; p += STRIDE) askStarts.push(p);
+    const bidStarts: number[] = [];
+    for (let p = MAX_SCAN; p >= STRIDE; p -= STRIDE) bidStarts.push(p);
+
+    const probe = async (isBid: boolean, starts: number[]) => {
+      const fn = isBid ? "nextBidBelow" : "nextAskAbove";
+      const res = await client.multicall({
+        allowFailure: true,
+        contracts: starts.map((tk) => ({ address: book, abi: bookAbi, functionName: fn, args: [tk] })),
+      });
+      const found = new Set<number>();
+      res.forEach((r) => {
+        if (r.status === "success") {
+          const tk = Number(r.result as bigint);
+          if (tk !== 0) found.add(tk);
+        }
+      });
+      return [...found];
+    };
+
+    const [bids, asks] = await Promise.all([probe(true, bidStarts), probe(false, askStarts)]);
+    discoCache = { bids, asks };
+  } catch {
+    /* keep previous cache */
+  }
+  return discoCache;
+}
+
+export function useBook(refetchMs = 3000) {
   // Pinned to Arc explicitly. Without this, usePublicClient() follows the
   // WALLET's chain — and if the wallet sits on mainnet (or anything not in our
   // config) it returns undefined and every read on the page silently dies.
@@ -33,51 +74,31 @@ export function useBook(refetchMs = 2000) {
       if (!client) return { bids: [], asks: [] };
       const book = ADDR.book as `0x${string}`;
 
-      // STRIDED SCAN. The contract's bitmap scan is capped at MAX_WORD_SCAN=64
-      // words (16384 ticks), so a single nextAskAbove walk stops at the first
-      // gap wider than that — which is why far levels never showed. Instead we
-      // probe nextBidBelow / nextAskAbove at 16384-tick strides across the whole
-      // realistic range in ONE multicall (pure eth_call, no getLogs), which
-      // jumps the gaps. A couple of follow-up passes catch any second order
-      // sitting inside the same window as a hit.
-      const STRIDE = 16384;
-      const MAX_SCAN = 600_000; // price up to ~6.0 — covers all realistic FX + test orders
-
-      const askStarts: number[] = [];
-      for (let p = 0; p <= MAX_SCAN; p += STRIDE) askStarts.push(p);
-      const bidStarts: number[] = [];
-      for (let p = MAX_SCAN; p >= STRIDE; p -= STRIDE) bidStarts.push(p);
-
-      const probe = async (isBid: boolean, starts: number[]): Promise<number[]> => {
-        const fn = isBid ? "nextBidBelow" : "nextAskAbove";
-        const found = new Set<number>();
-        let frontier = starts;
-        for (let pass = 0; pass < 4 && frontier.length; pass++) {
-          const res = await client.multicall({
-            allowFailure: true,
-            contracts: frontier.map((tk) => ({ address: book, abi: bookAbi, functionName: fn, args: [tk] })),
-          });
-          const fresh: number[] = [];
-          res.forEach((r) => {
-            if (r.status === "success") {
-              const tk = Number(r.result as bigint);
-              if (tk !== 0 && !found.has(tk)) {
-                found.add(tk);
-                fresh.push(tk);
-              }
-            }
-          });
-          // Pass 2+: step one past each new hit to catch same-window neighbours.
-          frontier = fresh;
-          if (found.size >= MAX_LEVELS * 2) break;
+      // Cheap bounded walk every cycle (near-spread levels, few calls) …
+      const walkTicks = async (isBid: boolean): Promise<number[]> => {
+        const fnBest = isBid ? "bestBid" : "bestAsk";
+        const fnNext = isBid ? "nextBidBelow" : "nextAskAbove";
+        const ticks: number[] = [];
+        let tick = Number(
+          await client.readContract({ address: book, abi: bookAbi, functionName: fnBest as never, args: [] as never }),
+        );
+        while (tick !== 0 && ticks.length < MAX_LEVELS) {
+          ticks.push(tick);
+          tick = Number(
+            await client.readContract({ address: book, abi: bookAbi, functionName: fnNext as never, args: [tick] as never }),
+          );
         }
-        return [...found];
+        return ticks;
       };
 
-      const [bidTicks, askTicks] = await Promise.all([
-        probe(true, bidStarts),
-        probe(false, askStarts),
-      ]);
+      // … plus a strided far-tick DISCOVERY at most every 30s (cached), so the
+      // RPC isn't hammered every refetch. Discovery jumps the contract's
+      // 64-word scan bound; the walk covers the spread in between runs.
+      const discovered = await stridedDiscover(client, book);
+
+      const [walkedBids, walkedAsks] = await Promise.all([walkTicks(true), walkTicks(false)]);
+      const bidTicks = [...new Set([...walkedBids, ...discovered.bids])];
+      const askTicks = [...new Set([...walkedAsks, ...discovered.asks])];
 
       // All level depths (both sides) in ONE multicall.
       const all = [...bidTicks.map((t) => [true, t] as const), ...askTicks.map((t) => [false, t] as const)];

@@ -54,35 +54,31 @@ export function TxHistory() {
 
     (async () => {
       try {
+        // ONE small range, TWO requests total. The previous 14-chunk version
+        // fired ~28 getLogs at once and rate-limited the RPC — which is what
+        // broke the swap quote ("HTTP request failed"). History is a nicety;
+        // it must never starve the trading path.
         const latest = await client.getBlockNumber();
-        const start = latest > 120_000n ? latest - 120_000n : 0n;
-        const ranges: [bigint, bigint][] = [];
-        for (let from = start; from <= latest; from += 9_001n) {
-          ranges.push([from, from + 9_000n > latest ? latest : from + 9_000n]);
-        }
+        const start = latest > 9_000n ? latest - 9_000n : 0n;
 
-        const swaps = await Promise.allSettled(
-          ranges.map(([from, to]) =>
-            client.getLogs({
-              address: ADDR.router as `0x${string}`,
-              event: swapEvent,
-              args: { taker: address },
-              fromBlock: from,
-              toBlock: to,
-            }),
-          ),
-        );
-        const placed = await Promise.allSettled(
-          ranges.map(([from, to]) =>
-            client.getLogs({
-              address: ADDR.book as `0x${string}`,
-              event: placedEvent,
-              args: { maker: address },
-              fromBlock: from,
-              toBlock: to,
-            }),
-          ),
-        );
+        const [swapsOne, placedOne] = await Promise.allSettled([
+          client.getLogs({
+            address: ADDR.router as `0x${string}`,
+            event: swapEvent,
+            args: { taker: address },
+            fromBlock: start,
+            toBlock: latest,
+          }),
+          client.getLogs({
+            address: ADDR.book as `0x${string}`,
+            event: placedEvent,
+            args: { maker: address },
+            fromBlock: start,
+            toBlock: latest,
+          }),
+        ]);
+        const swaps = [swapsOne];
+        const placed = [placedOne];
 
         const out: Entry[] = [];
         for (const r of swaps) {
