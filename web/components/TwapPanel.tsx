@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useAccount, useWriteContract } from "wagmi";
 import { ADDR, arcTestnet, erc20Abi, parse, twapAbi } from "@/lib/contracts";
 
@@ -34,6 +34,17 @@ export function TwapPanel() {
   const [status, setStatus] = useState<string | null>(null);
   const [twapOrders, setTwapOrders] = useState<TwapOrder[]>([]);
 
+  // Load persisted TWAP orders on mount / wallet change.
+  const twapKey = address ? `onyx-twaps-${address.toLowerCase()}` : null;
+  useEffect(() => {
+    if (!twapKey) return;
+    try {
+      setTwapOrders(JSON.parse(localStorage.getItem(twapKey) ?? "[]"));
+    } catch {
+      setTwapOrders([]);
+    }
+  }, [twapKey]);
+
   const inSym = zeroForOne ? "USDC" : "EURC";
 
   async function create() {
@@ -65,20 +76,24 @@ export function TwapPanel() {
         chainId: arcTestnet.id,
       });
 
-      setTwapOrders((prev) => [
-        {
-          id: hash,
-          side: `Sell ${inSym}`,
-          total,
-          slices: n,
-          filled: 0,
-          everyMin: Number(minutes),
-          minPrice: floor,
-          status: "active",
-          createdAt: Date.now(),
-        },
-        ...prev,
-      ]);
+      setTwapOrders((prev) => {
+        const next = [
+          {
+            id: hash,
+            side: `Sell ${inSym}`,
+            total,
+            slices: n,
+            filled: 0,
+            everyMin: Number(minutes),
+            minPrice: floor,
+            status: "active" as const,
+            createdAt: Date.now(),
+          },
+          ...prev,
+        ];
+        if (twapKey) localStorage.setItem(twapKey, JSON.stringify(next));
+        return next;
+      });
       setStatus(`Scheduled · ${hash.slice(0, 10)}…`);
     } catch (e) {
       const m = e instanceof Error ? e.message : "failed";

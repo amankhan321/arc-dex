@@ -57,6 +57,11 @@ export const bookAbi = [
   { type: "function", name: "takerFeeBps", stateMutability: "view", inputs: [], outputs: [{ type: "uint256" }] },
   { type: "function", name: "placeOrder", stateMutability: "nonpayable", inputs: [{ type: "bool" }, { type: "uint32" }, { type: "uint128" }], outputs: [{ type: "uint64" }] },
   { type: "function", name: "cancelOrder", stateMutability: "nonpayable", inputs: [{ type: "uint64" }], outputs: [] },
+  { type: "function", name: "orders", stateMutability: "view", inputs: [{ type: "uint64" }], outputs: [
+    { name: "maker", type: "address" }, { name: "tick", type: "uint32" }, { name: "isBid", type: "bool" },
+    { name: "active", type: "bool" }, { name: "baseAmount", type: "uint128" }, { name: "baseFilled", type: "uint128" },
+    { name: "quoteEscrow", type: "uint256" }, { name: "prev", type: "uint64" }, { name: "next", type: "uint64" },
+  ] },
   { type: "function", name: "claim", stateMutability: "nonpayable", inputs: [], outputs: [{ type: "uint256" }, { type: "uint256" }] },
   { type: "function", name: "flushFees", stateMutability: "nonpayable", inputs: [], outputs: [] },
 ] as const;

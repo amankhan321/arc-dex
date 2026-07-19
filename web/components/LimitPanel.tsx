@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { useAccount, useBalance, usePublicClient, useReadContract, useWriteContract } from "wagmi";
 import { decodeEventLog } from "viem";
 import { useBook, usePool } from "@/lib/useBook";
+import { useMyOrders } from "@/lib/useMyOrders";
 import { ADDR, arcTestnet, bookAbi, erc20Abi, parse, tickOf } from "@/lib/contracts";
 
 const placedAbi = [
@@ -41,9 +42,8 @@ export function LimitPanel() {
   const [size, setSize] = useState("2");
   const [status, setStatus] = useState<string | null>(null);
 
-  type OpenOrder = { id: bigint; side: string; price: string; size: string; tx: string };
-  const [orders, setOrders] = useState<OpenOrder[]>([]);
   const client = usePublicClient({ chainId: arcTestnet.id });
+  const { orders, add: addOrder, remove: removeOrder } = useMyOrders();
 
   // Pre-flight checks (the contract enforces all of this on-chain too — these
   // exist so the user sees the problem BEFORE MetaMask, not as a revert).
@@ -125,10 +125,7 @@ export function LimitPanel() {
       } catch {}
 
       if (placedId != null) {
-        setOrders((prev) => [
-          { id: placedId!, side: isBid ? "Buy USDC" : "Sell USDC", price, size, tx: hash },
-          ...prev,
-        ]);
+        addOrder({ id: placedId.toString(), side: isBid ? "Buy USDC" : "Sell USDC", price, size, tx: hash });
       }
       setStatus(`Resting · ${hash.slice(0, 10)}…`);
     } catch (e) {
@@ -156,17 +153,17 @@ export function LimitPanel() {
     }
   }
 
-  async function cancel(id: bigint) {
+  async function cancel(id: string) {
     try {
       setStatus("Cancelling…");
       await writeContractAsync({
         address: ADDR.book as `0x${string}`,
         abi: bookAbi,
         functionName: "cancelOrder",
-        args: [id],
+        args: [BigInt(id)],
         chainId: arcTestnet.id,
       });
-      setOrders((prev) => prev.filter((o) => o.id !== id));
+      removeOrder(id);
       setStatus("Cancelled — claim to withdraw the escrow");
     } catch (e) {
       const m = e instanceof Error ? e.message : "failed";
@@ -251,11 +248,11 @@ export function LimitPanel() {
           <h3 className="text-sm font-medium text-fg">Your open orders</h3>
           <div className="mt-2 space-y-2">
             {orders.map((o) => (
-              <div key={o.id.toString()} className="inner flex items-center justify-between p-3">
+              <div key={o.id} className="inner flex items-center justify-between p-3">
                 <div className="min-w-0">
                   <div className="text-xs font-medium text-fg">{o.side}</div>
                   <div className="font-mono text-[11px] text-faint">
-                    {o.size} @ {o.price} · #{o.id.toString()}
+                    {o.size} @ {o.price} · #{o.id}
                   </div>
                 </div>
                 <button
