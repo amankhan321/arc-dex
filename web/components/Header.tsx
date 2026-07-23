@@ -19,13 +19,13 @@ export function Header() {
   return (
     <header className="sticky top-0 z-30 border-b border-[color:var(--line)] bg-base backdrop-blur-xl">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-3.5">
-        <Link href="/" className="group flex items-center gap-2.5">
+        <Link href="/" className="group logo-3d">
           <motion.div
             whileHover={{ rotate: 8, scale: 1.08 }}
             transition={{ type: "spring", stiffness: 300, damping: 18 }}
-            className="h-[18px] w-[18px] rounded-[6px] bg-gradient-to-br from-indigo to-mint"
+            className="logo-mark-3d relative h-[18px] w-[18px] rounded-[6px] bg-gradient-to-br from-indigo to-mint"
           />
-          <span className="text-sm font-medium tracking-tight text-fg">
+          <span className="logo-word-3d text-sm font-medium tracking-tight text-fg">
             Onyx
           </span>
           <span className="hidden rounded-full border border-[color:var(--line)] px-2 py-0.5 text-[10px] text-muted sm:block">
